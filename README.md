@@ -1,4 +1,4 @@
-# popup-validate
+# popup-validation
 Pure JavaScript/CSS library for validating DOM input fields
 
 [![Gemnasium](https://img.shields.io/gemnasium/mathiasbynens/he.svg)]()
