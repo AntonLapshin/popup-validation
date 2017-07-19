@@ -1,4 +1,37 @@
-import "./style.scss";
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(global.validation = factory());
+}(this, (function () { 'use strict';
+
+const Rules = {
+  required: {
+    message: "Required",
+    method: el => {
+      if (el.type === "checkbox") {
+        return el.checked;
+      } else if (el.type === "radio") {
+        const name = el.name;
+        return (
+          el.parentNode.querySelectorAll(`input[name=${name}]:checked`).length >
+          0
+        );
+      }
+      return el.value !== "";
+    }
+  },
+  email: {
+    message: "E-mail is wrong",
+    method: el => {
+      return (
+        el.value === "" ||
+        /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
+          el.value
+        )
+      );
+    }
+  }
+};
 
 const VALIDATE = "validate";
 const VALIDATE_POPUP = "validate-popup";
@@ -6,8 +39,6 @@ const DATA_VALIDATE = "data-validate";
 const VALIDATE_ERROR = "validate-error";
 const ACTIVE = "active";
 const Events = ["change", "paste", "blur", "keyup"];
-
-import { Rules } from "./rules";
 
 const onAction = e => {
   const el = e.target;
@@ -78,31 +109,20 @@ const setupEventHandlers = setup => {
   document[action]("click", onClick);
 };
 
-export default {
-  /**
-   * Initialize the validation fields
-   * 
-   */
+var index = {
   init: () => {
     setupEventHandlers(true);
   },
 
-  /**
-   * Deactivate the validation fields
-   */
   destroy: () => {
     setupEventHandlers(false);
   },
 
-  /**
-   * Returns the set of predefined rules
-   * 
-   * @returns {object} Rules
-   * 
-   * Signature of the rule is `el => boolean` where
-   * el is an input field (DOM Element)
-   */
   getRules: () => {
     return Rules;
   }
 };
+
+return index;
+
+})));

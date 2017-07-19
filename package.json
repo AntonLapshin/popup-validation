@@ -11,7 +11,8 @@
     "commit": "./node_modules/.bin/git-cz",
     "build-es6": "./node_modules/.bin/rollup -c rollup.es6.config.js",
     "build-prod": "./node_modules/.bin/rollup -c rollup.config.js",
-    "build": "npm run build-es6 && npm run build-prod"
+    "build": "npm run build-es6 && npm run build-prod",
+    "deploy": "./node_modules/.bin/gh-pages -d bin"
   },
   "repository": {
     "type": "git",
@@ -42,6 +43,7 @@
     "coveralls": "^2.13.1",
     "cz-conventional-changelog": "^2.0.0",
     "eslint": "^3.19.0",
+    "gh-pages": "^1.0.0",
     "istanbul": "^1.0.0-alpha.2",
     "jsdoc": "^3.4.3",
     "jsdoc-to-markdown": "^3.0.0",
@@ -49,6 +51,7 @@
     "rollup": "^0.43.0",
     "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-scss": "^0.3.0",
     "rollup-plugin-uglify": "^2.0.1",
     "should": "^11.2.1"
   },

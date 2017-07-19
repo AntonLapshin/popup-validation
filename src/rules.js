@@ -1,4 +1,4 @@
-export default Rules = {
+export const Rules = {
   required: {
     message: "Required",
     method: el => {
