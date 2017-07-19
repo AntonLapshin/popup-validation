@@ -2,7 +2,7 @@
 Pure JavaScript/CSS library for validating DOM input fields
 
 [![Gemnasium](https://img.shields.io/gemnasium/mathiasbynens/he.svg)]()
-![Lib Size](http://img.badgesize.io/AntonLapshin/popup-validation/master/bin/popup-validation.min.js.svg?compression=gzip)
+![Lib Size](http://img.badgesize.io/AntonLapshin/popup-validation/master/bin/validation.min.js.svg?compression=gzip)
 [![npm](https://img.shields.io/npm/dt/popup-validation.svg)](https://www.npmjs.com/package/popup-validation)
 [![GitHub stars](https://img.shields.io/github/stars/AntonLapshin/popup-validation.svg?style=social&label=Star)](https://github.com/AntonLapshin/popup-validation)
 
