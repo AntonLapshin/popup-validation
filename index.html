@@ -52,7 +52,7 @@
       display: inline-block;
     }
 
-    form > div {
+    form>div {
       padding: 1em;
     }
 
@@ -114,12 +114,12 @@
       <label for="agree">Agree to Some Terms:</label>
       <input type="checkbox" id="agree" class="validate form-control" data-validate="required" />
     </div>
-    <input id="submitButton" type="submit" value="Submit" />
+    <button id="submitButton" type="submit">Submit</button>
   </form>
 
   <script src="validation.es6.js"></script>
   <script>
-    validation.init();
+    validation.init("form");
   </script>
 </body>
 
