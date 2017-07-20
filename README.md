@@ -25,7 +25,7 @@ HTML
 ```html
   <link href="validation.css" rel="stylesheet">
   <script src="validation.es6.js"></script>
-  <!-- Or minified ES5 version -->
+  <!-- Minified ES5 version -->
   <!-- <script src="validation.min.js"></script> -->
 
   <div>
@@ -38,14 +38,30 @@ JavaScript
 
 ```js
 validation.init();
+
+// Or if you have a form
+// Submit event will be prevented if there are any errors
+validation.init("#myForm"); 
+
+validation.highlight(); // show errors
+
+validation.hide(); // hide errors
+
+validation.isValid(); // check if container is valid (body by default)
+
+validation.validate(); // check if cotnainer is valid (body by default) + highlight
 ```
 
 <a name="API"></a>
 
 # API
 
-## validation.init() => <code>void</code>
-Initialize the validation fields
+## validation.init(el) => <code>void</code>
+Initialize the validation fields inside of the `el` container. If `el` is a `<form>` element then submit event will be prevented if there are any errors
+
+| Param | Type | Description |
+| --- | --- | --- |
+| el | <code>Element</code> | Container or `<form>` Element |
 
 Affects all input fields with `validate` class
 
@@ -58,13 +74,49 @@ Example:
 <input type="email" class="validate" data-validate="required, email" />
 ```
 
-## validation.destroy() => <code>void</code>
-Deactivate the validation fields
+## validation.destroy(el) => <code>void</code>
+Deactivate the validation fields inside of the `el` container
+
+| Param | Type | Description |
+| --- | --- | --- |
+| el | <code>Element</code> | Container or `<form>` Element |
+
+## validation.hide(el) => <code>void</code>
+Hide all errors inside of the `el` container
+
+| Param | Type | Description |
+| --- | --- | --- |
+| el | <code>Element</code> | Container or `<form>` Element |
+
+## validation.highlight(el) => <code>void</code>
+Highlight all errors inside of the `el` container
+
+| Param | Type | Description |
+| --- | --- | --- |
+| el | <code>Element</code> | Container or `<form>` Element |
+
+## validation.isValid(el) => <code>boolean</code>
+Check if all input fields inside of the `el` container are valid
+
+**Returns**: <code>boolean</code> - True if all input fields inside of the container are valid
+
+| Param | Type | Description |
+| --- | --- | --- |
+| el | <code>Element</code> | Container or `<form>` Element |
+
+## validation.validate(el) => <code>boolean</code>
+Validate all input fields inside of the `el` container 
+
+**Returns**: <code>boolean</code> - True if all input fields inside of the container are valid
+
+| Param | Type | Description |
+| --- | --- | --- |
+| el | <code>Element</code> | Container or `<form>` Element |
 
 ## validation.getRules() => <code>object</code>
-Get the set of predefined rules
+Get the set of the predefined rules
 
-**Returns**: <code>object</code> - The list of predefined rules
+**Returns**: <code>object</code> - The set of the predefined rules
 
 ### Rule signature
 el => <code>boolean</code>
@@ -78,17 +130,17 @@ el => <code>boolean</code>
 ## Example of extending Rules
 
 ```js
-  const Rules = validation.getRules();
-  Rules["integer"] = {
-    message: "Value is not an integer",
-    method: el => {
-      return parseInt(el.value, 10) !== NaN;
-    }    
-  }
+const Rules = validation.getRules();
+Rules["integer"] = {
+  message: "Value is not an integer",
+  method: el => {
+    return el.value.length === 0 || !isNaN(parseInt(el.value, 10));
+  }    
+}
 ```
 
 ```html
-<input class="validate" data-validate="required, integer" />
+<input class="validate" data-validate="required,integer" />
 ```
 
 ---

@@ -9,15 +9,11 @@ const Events = ["change", "paste", "blur", "keyup"];
 
 import { Rules } from "./rules";
 
-const onAction = e => {
-  const el = e.target;
-  if (!el.matches("." + VALIDATE)) {
-    return;
-  }
+const getMessage = el => {
   const types = el.getAttribute(DATA_VALIDATE).split(",").map(type => {
     return type.trim();
   });
-  const message = types
+  return types
     .filter(type => {
       return !Rules[type].method(el);
     })
@@ -25,6 +21,14 @@ const onAction = e => {
       return Rules[type].message;
     })
     .join(", ");
+};
+
+const onAction = e => {
+  const el = e.target;
+  if (!el.matches("." + VALIDATE)) {
+    return;
+  }
+  const message = getMessage(el);
 
   el.classList.toggle(VALIDATE_ERROR, !!message);
   let popup = el.previousElementSibling;
@@ -54,6 +58,9 @@ const onAction = e => {
   }
 };
 
+const getEl = (el = "body") =>
+  typeof el === "string" ? document.querySelector(el) : el;
+
 const onClick = e => {
   const el = e.target;
   if (!el.matches("." + VALIDATE_POPUP)) {
@@ -66,43 +73,124 @@ const onClick = e => {
   el.classList.toggle(ACTIVE, false);
 };
 
-const setupEventHandlers = setup => {
+const onSubmit = e => {
+  const isValid = validation.validate(e.target);
+  if (isValid) {
+    return true;
+  }
+  e.preventDefault();
+  return false;
+};
+
+const setupEventHandlers = (el, setup) => {
+  el = getEl(el);
   const action = setup ? "addEventListener" : "removeEventListener";
-  const validateEls = document.querySelectorAll("." + VALIDATE);
-  Array.prototype.forEach.call(validateEls, el => {
+  const els = el.querySelectorAll("." + VALIDATE);
+  Array.prototype.forEach.call(els, el => {
     Events.forEach(e => {
       el[action](e, onAction);
     });
   });
 
   document[action]("click", onClick);
+
+  if (el.nodeName === "FORM") {
+    el[action]("submit", onSubmit);
+  }
 };
 
-export default {
+const validation = {
   /**
    * Initialize the validation fields
    * 
+   * @param {Element|string} Container or specific form
    */
-  init: () => {
-    setupEventHandlers(true);
+  init: el => {
+    setupEventHandlers(el, true);
   },
 
   /**
    * Deactivate the validation fields
+   * 
+   * @param {Element|string} Container or specific form
    */
-  destroy: () => {
-    setupEventHandlers(false);
+  destroy: el => {
+    validation.hide(el);
+    setupEventHandlers(el, false);
   },
 
   /**
-   * Returns the set of predefined rules
+   * Hide all opened popups inside of the containers
+   * 
+   * @param {Element|string} Container or specific form
+   */
+  hide: el => {
+    el = getEl(el);
+    const els = el.querySelectorAll("." + VALIDATE_POPUP);
+    Array.prototype.forEach.call(els, el => {
+      el.classList.toggle(ACTIVE, false);
+      const next = el.nextElementSibling;
+      if (next.matches("." + VALIDATE)) {
+        next.classList.toggle(VALIDATE_ERROR, false);
+      }      
+    });
+  },
+
+  /**
+   * Show error popups inside of the container
+   * 
+   * @param {Element} el Container
+   */
+  highlight: el => {
+    el = getEl(el);
+    const els = el.querySelectorAll("." + VALIDATE);
+    Array.prototype.forEach.call(els, el => {
+      const event = document.createEvent("HTMLEvents");
+      event.initEvent("blur", true, false);
+      el.dispatchEvent(event);
+    });
+  },
+
+  /**
+   * Check if all input fields inside of the container are valid
+   * 
+   * @param {Element} el Container
+   * @returns {boolean} True if all input fields inside of the container are valid
+   */
+  isValid: el => {
+    el = getEl(el);
+    const els = el.querySelectorAll("." + VALIDATE);
+    const isValid = Array.prototype.every.call(els, el => {
+      return !getMessage(el);
+    });
+    return isValid;
+  },
+
+  /**
+   * Validate all input fields in the DOM container 
+   * 
+   * @param {Element} el Container
+   * @returns {boolean} True if all input fields inside of the container are valid
+   */
+  validate: el => {
+    validation.highlight(el);
+    return validation.isValid(el);
+  },
+
+  /**
+   * Returns the set of the predefined rules
    * 
    * @returns {object} Rules
    * 
-   * Signature of the rule is `el => boolean` where
-   * el is an input field (DOM Element)
+   * ruleName: {
+   *   message: "Message when element didn't pass the rule",
+   *   method: el => boolean
+   * }
+   * 
    */
   getRules: () => {
     return Rules;
   }
 };
+
+export default validation;
