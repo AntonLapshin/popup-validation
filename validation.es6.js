@@ -84,8 +84,19 @@ const onAction = e => {
       popup.style.marginTop = -(popup.clientHeight + 8) + "px";
       popup.classList.toggle(ACTIVE, true);
     }, 0);
-  } else {
-    popup && popup.classList.toggle(ACTIVE, false);
+  } else if (popup && popup.matches("." + VALIDATE_POPUP)) {
+    if (el.type === "radio"){
+      const name = el.name;
+      const rbs = document.querySelectorAll(`input[name="${name}"]`);
+      Array.prototype.forEach.call(rbs, el => {
+        const popup = el.previousElementSibling;
+        if (popup && popup.matches("." + VALIDATE_POPUP)){
+          popup.classList.toggle(ACTIVE, false);
+        }
+      });
+    } else {
+      popup.classList.toggle(ACTIVE, false);
+    }
   }
 };
 
