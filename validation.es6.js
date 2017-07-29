@@ -84,7 +84,7 @@ const onAction = e => {
       popup.style.marginTop = -(popup.clientHeight + 8) + "px";
       popup.classList.toggle(ACTIVE, true);
     }, 0);
-  } else if (popup && popup.matches("." + VALIDATE_POPUP)) {
+  } else {
     if (el.type === "radio"){
       const name = el.name;
       const rbs = document.querySelectorAll(`input[name="${name}"]`);
@@ -94,7 +94,7 @@ const onAction = e => {
           popup.classList.toggle(ACTIVE, false);
         }
       });
-    } else {
+    } else if (popup && popup.matches("." + VALIDATE_POPUP)) {
       popup.classList.toggle(ACTIVE, false);
     }
   }
