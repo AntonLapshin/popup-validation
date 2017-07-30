@@ -73,6 +73,13 @@ document.getElementById("customClassValidation").addEventListener("click", e => 
 });
 ```
 
+## Predefined Rules
+
+* required
+* email
+
+> The set of rules can be easily extended. Please take a look at the [example](#RULES)
+
 <a name="API"></a>
 
 # API
@@ -158,6 +165,8 @@ el => <code>boolean</code>
 
 ## Example of extending Rules
 
+<a name="RULES"></a>
+
 ```js
 const Rules = validation.getRules();
 Rules["integer"] = {
@@ -173,8 +182,7 @@ Rules["integer"] = {
 ```
 
 ## validation.addClassValidation(className) => <code>self</code>
-Add class validation. For external libraries that can set/remove className of the element
-For instance, braintree-hosted-fields-invalid class is set by braintree client library when iframe with the input fieldan error detects an error, More info here:
+Add class validation. For external libraries that can set/remove className of the element. For instance, braintree-hosted-fields-invalid class is set by braintree client library when iframe with the input field detects an error, More info here:
 https://developers.braintreepayments.com/guides/hosted-fields/styling/javascript/v2
 
 **Returns**: <code>object</code> - Self validation instance for chain calls
