@@ -59,6 +59,10 @@
     .form-control {
       border-radius: 0;
     }
+
+    button {
+      margin: 1em;
+    }
   </style>
 
 </head>
@@ -114,12 +118,21 @@
       <label for="agree">Agree to Some Terms:</label>
       <input type="checkbox" id="agree" class="validate form-control" data-validate="required" />
     </div>
+    <div id="customClassValidation" class="form-control validate-class">Click at me to toggle custom class validation</div>
     <button id="submitButton" type="submit">Submit</button>
   </form>
 
   <script src="validation.es6.js"></script>
   <script>
     validation.init("form");
+
+    //
+    // Custom Class Validation Usage
+    //
+    validation.addClassValidation("my-class-invalid");
+    document.getElementById("customClassValidation").addEventListener("click", e => {
+      e.target.classList.toggle("my-class-invalid");
+    });
   </script>
 </body>
 

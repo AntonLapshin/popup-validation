@@ -18,12 +18,47 @@
   .validate-popup:after {
     position: absolute;
     bottom: 0;
-    left: 0;
+    right: 0;
     content: '';
     width: 0;
     height: 0;
     border-style: solid;
     border-width: 5px 5px 0 5px;
     border-color: #d10000 transparent transparent transparent;
-    margin-left: 8px;
+    margin-right: 8px;
     margin-bottom: -5px; }
+  .validate-popup.short-version:after {
+    left: 0;
+    margin-left: 8px; }
+
+/**
+ * Validation based on className, for iframe solutions
+ */
+.validate-class {
+  position: relative; }
+
+.validate-class:before,
+.validate-class:after {
+  opacity: 0;
+  transition: opacity ease 400ms;
+  position: absolute;
+  right: 0;
+  top: -36px; }
+
+.validate-class:before {
+  content: 'Invalid';
+  background-color: #d10000;
+  color: white;
+  font-size: 12px;
+  line-height: 1;
+  padding: 8px 12px; }
+
+.validate-class:after {
+  content: '';
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 5px 5px 0 5px;
+  border-color: #d10000 transparent transparent transparent;
+  margin-top: 28px;
+  margin-right: 10px; }
