@@ -10,7 +10,7 @@ Pure JavaScript/CSS library for validating DOM input fields
 
 [JSFiddle](https://jsfiddle.net/AntonLapshin/hjwg8a89/)
 
-![](https://snag.gy/KCPZ52.jpg)
+![](https://snag.gy/Gvj2nN.jpg)
 
 ## Install
 
@@ -39,7 +39,7 @@ JavaScript
 ```js
 validation.init();
 
-// Or if you have a form
+// If you have a form just pass form selector or element
 // Submit event will be prevented if there are any errors
 validation.init("#myForm"); 
 
@@ -52,12 +52,35 @@ validation.isValid(); // check if container is valid (body by default)
 validation.validate(); // check if cotnainer is valid (body by default) + highlight
 ```
 
+## Custom Class Validation
+
+Some services like [Braintree](https://www.braintreepayments.com/) use iframes to control the inputs on a page. That also can be useful if some javascript logic sets and removes a certain class to/from a div or input field that indicates that the field is not validated.
+
+HTML
+
+```html
+<div id="customClassValidation" class="validate-class">
+  Click at me to toggle custom class validation
+</div> 
+```
+
+```js
+validation.addClassValidation("my-class-invalid");
+
+// Test
+document.getElementById("customClassValidation").addEventListener("click", e => {
+  e.target.classList.toggle("my-class-invalid");
+});
+```
+
 <a name="API"></a>
 
 # API
 
-## validation.init(el) => <code>void</code>
+## validation.init(el) => <code>self</code>
 Initialize the validation fields inside of the `el` container. If `el` is a `<form>` element then submit event will be prevented if there are any errors
+
+**Returns**: <code>object</code> - Self validation instance for chain calls
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -74,22 +97,28 @@ Example:
 <input type="email" class="validate" data-validate="required, email" />
 ```
 
-## validation.destroy(el) => <code>void</code>
+## validation.destroy(el) => <code>self</code>
 Deactivate the validation fields inside of the `el` container
 
+**Returns**: <code>object</code> - Self validation instance for chain calls
+
 | Param | Type | Description |
 | --- | --- | --- |
 | el | <code>Element</code> | Container or `<form>` Element |
 
-## validation.hide(el) => <code>void</code>
+## validation.hide(el) => <code>self</code>
 Hide all errors inside of the `el` container
 
+**Returns**: <code>object</code> - Self validation instance for chain calls
+
 | Param | Type | Description |
 | --- | --- | --- |
 | el | <code>Element</code> | Container or `<form>` Element |
 
-## validation.highlight(el) => <code>void</code>
+## validation.highlight(el) => <code>self</code>
 Highlight all errors inside of the `el` container
+
+**Returns**: <code>object</code> - Self validation instance for chain calls
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -142,6 +171,17 @@ Rules["integer"] = {
 ```html
 <input class="validate" data-validate="required,integer" />
 ```
+
+## validation.addClassValidation(className) => <code>self</code>
+Add class validation. For external libraries that can set/remove className of the element
+For instance, braintree-hosted-fields-invalid class is set by braintree client library when iframe with the input fieldan error detects an error, More info here:
+https://developers.braintreepayments.com/guides/hosted-fields/styling/javascript/v2
+
+**Returns**: <code>object</code> - Self validation instance for chain calls
+
+| Param | Type | Description |
+| --- | --- | --- |
+| className | <code>string</code> | Class name that indicates that the field is invalid |
 
 ---
 

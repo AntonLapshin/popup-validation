@@ -1,4 +1,5 @@
 import "./style.scss";
+import { Rules } from "./rules";
 
 const VALIDATE = "validate";
 const VALIDATE_POPUP = "validate-popup";
@@ -6,14 +7,29 @@ const DATA_VALIDATE = "data-validate";
 const VALIDATE_ERROR = "validate-error";
 const ACTIVE = "active";
 const Events = ["change", "paste", "blur", "keyup"];
+const ValidationClassStyles = `
+.{0} {
+  border-color: #D10000 !important;
+}
+.{0}:before {
+  opacity: 1;
+}
+.{0}:after {
+  opacity: 1;
+}`;
 
-import { Rules } from "./rules";
+//
+// Custom Validation Class
+//
+let _className = null;
 
 const getMessage = el => {
-  const types = el.getAttribute(DATA_VALIDATE).split(",").map(type => {
-    return type.trim();
-  });
-  return types
+  return el
+    .getAttribute(DATA_VALIDATE)
+    .split(",")
+    .map(type => {
+      return type.trim();
+    })
     .filter(type => {
       return !Rules[type].method(el);
     })
@@ -52,14 +68,18 @@ const onAction = e => {
       popup.style.top = top + "px";
       popup.style.marginTop = -(popup.clientHeight + 8) + "px";
       popup.classList.toggle(ACTIVE, true);
+      popup.classList.toggle(
+        "short-version",
+        el.clientWidth < popup.clientWidth
+      );
     }, 0);
   } else {
-    if (el.type === "radio"){
+    if (el.type === "radio") {
       const name = el.name;
       const rbs = document.querySelectorAll(`input[name="${name}"]`);
       Array.prototype.forEach.call(rbs, el => {
         const popup = el.previousElementSibling;
-        if (popup && popup.matches("." + VALIDATE_POPUP)){
+        if (popup && popup.matches("." + VALIDATE_POPUP)) {
           popup.classList.toggle(ACTIVE, false);
         }
       });
@@ -115,25 +135,30 @@ const validation = {
    * Initialize the validation fields
    * 
    * @param {Element|string} Container or specific form
+   * @returns {object} validation instance (chain call)
    */
   init: el => {
     setupEventHandlers(el, true);
+    return validation;
   },
 
   /**
    * Deactivate the validation fields
    * 
    * @param {Element|string} Container or specific form
+   * @returns {object} validation instance (chain call)
    */
   destroy: el => {
     validation.hide(el);
     setupEventHandlers(el, false);
+    return validation;
   },
 
   /**
    * Hide all opened popups inside of the containers
    * 
    * @param {Element|string} Container or specific form
+   * @returns {object} validation instance (chain call)
    */
   hide: el => {
     el = getEl(el);
@@ -143,14 +168,16 @@ const validation = {
       const next = el.nextElementSibling;
       if (next.matches("." + VALIDATE)) {
         next.classList.toggle(VALIDATE_ERROR, false);
-      }      
+      }
     });
+    return validation;
   },
 
   /**
    * Show error popups inside of the container
    * 
    * @param {Element} el Container
+   * @returns {object} validation instance (chain call)
    */
   highlight: el => {
     el = getEl(el);
@@ -160,6 +187,7 @@ const validation = {
       event.initEvent("blur", true, false);
       el.dispatchEvent(event);
     });
+    return validation;
   },
 
   /**
@@ -171,10 +199,13 @@ const validation = {
   isValid: el => {
     el = getEl(el);
     const els = el.querySelectorAll("." + VALIDATE);
-    const isValid = Array.prototype.every.call(els, el => {
+    let valid = Array.prototype.every.call(els, el => {
       return !getMessage(el);
     });
-    return isValid;
+    if (_className && el.querySelectorAll("." + _className).length > 0) {
+      valid = false;
+    }
+    return valid;
   },
 
   /**
@@ -201,6 +232,27 @@ const validation = {
    */
   getRules: () => {
     return Rules;
+  },
+
+  /**
+   * Add class validation. For external libraries that can 
+   * set/remove className of the element
+   * 
+   * For instance, braintree-hosted-fields-invalid class is 
+   * set by braintree client library when iframe with the 
+   * input fieldan error detects an error, More info here:
+   * https://developers.braintreepayments.com/guides/hosted-fields/styling/javascript/v2
+   * 
+   * @param {string} className Class name that indicates that the field is invalid
+   * @returns {object} validation instance (chain call)
+   */
+  addClassValidation: className => {
+    const styles = ValidationClassStyles.replace(/\{0\}/gi, className);
+    const styleTag = document.createElement("style");
+    styleTag.innerHTML = styles;
+    document.head.appendChild(styleTag);
+    _className = className;
+    return validation;
   }
 };
 
