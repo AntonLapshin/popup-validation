@@ -163,9 +163,9 @@ el => <code>boolean</code>
 
 **Returns**: <code>boolean</code> - True if the field is validated
 
-## Example of extending Rules
-
 <a name="RULES"></a>
+
+## Example of extending Rules
 
 ```js
 const Rules = validation.getRules();
