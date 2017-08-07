@@ -10,7 +10,7 @@ Pure JavaScript/CSS library for validating DOM input fields
 
 [JSFiddle](https://jsfiddle.net/AntonLapshin/hjwg8a89/)
 
-![](https://snag.gy/Gvj2nN.jpg)
+![](https://cdn.pbrd.co/images/GEzQ5ob.png)
 
 ## Install
 
@@ -28,7 +28,7 @@ HTML
 
 <div>
   <label for="email">Email:</label>
-  <input type="email" id="email" class="validate form-control" 
+  <input type="email" id="email" class="validate" 
          data-validate="required,email" />
 </div>  
 ```
@@ -37,19 +37,19 @@ JS
 
 Initialization
 
-* Track input fields inside of the BODY
+* Track input fields inside of the `<body>`
 
 ```js
 validation.init();
 ```
 
-* Track input fields inside of a container of a form. Submit event will be prevented if there are any errors
+* Track input fields inside of a container or a form. `Submit` event will be prevented if there are any errors
 
 ```js
 validation.init("#myForm");
 ```
 
-* Options. Trigger Events
+* Set options: trigger events (when popups should be shown)
 
 ```js
 validation.init("#myForm", {
@@ -133,7 +133,7 @@ Example:
 
 ```html
 <input class="validate" data-validate="required" />
-<input type="email" class="validate" data-validate="required, email" />
+<input type="email" class="validate" data-validate="required,email" />
 ```
 
 ## validation.destroy(el) => <code>self</code>
@@ -226,7 +226,7 @@ https://developers.braintreepayments.com/guides/hosted-fields/styling/javascript
 
 ---
 
-## Browsers support <sub><sup>made by <a href="https://godban.github.io">godban</a></sup></sub>
+## Browsers support <sub>made by <a href="https://godban.github.io">godban</a></sub>
 
 | [<img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/edge.png" alt="IE / Edge" width="16px" height="16px" />](http://godban.github.io/browsers-support-badges/)</br>IE / Edge | [<img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/firefox.png" alt="Firefox" width="16px" height="16px" />](http://godban.github.io/browsers-support-badges/)</br>Firefox | [<img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/chrome.png" alt="Chrome" width="16px" height="16px" />](http://godban.github.io/browsers-support-badges/)</br>Chrome | [<img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/safari.png" alt="Safari" width="16px" height="16px" />](http://godban.github.io/browsers-support-badges/)</br>Safari | [<img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/opera.png" alt="Opera" width="16px" height="16px" />](http://godban.github.io/browsers-support-badges/)</br>Opera | [<img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/safari-ios.png" alt="iOS Safari" width="16px" height="16px" />](http://godban.github.io/browsers-support-badges/)</br>iOS Safari | [<img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/chrome-android.png" alt="Chrome for Android" width="16px" height="16px" />](http://godban.github.io/browsers-support-badges/)</br>Chrome for Android |
 | --------- | --------- | --------- | --------- | --------- | --------- | --------- |
