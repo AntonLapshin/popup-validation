@@ -11,6 +11,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
   <link href="validation.css" rel="stylesheet">
+  <script async defer src="//buttons.github.io/buttons.js"></script>
 
   <style>
     body {
@@ -63,11 +64,21 @@
     button {
       margin: 1em;
     }
+
+    #customClassValidation {
+      height: 30px;
+      width: 100%;
+      border: 1px solid #bbb;
+    }    
   </style>
 
 </head>
 
 <body>
+  <p>Pure JavaScript popup validation. Read <a href="https://github.com/AntonLapshin/popup-validation#popup-validation">docs</a></p>
+  <!-- Place this tag where you want the button to render. -->
+  <a class="github-button" href="https://github.com/AntonLapshin/popup-validation" data-icon="octicon-star" data-show-count="true" aria-label="Star AntonLapshin/popup-validation on GitHub">Star</a>
+
   <h2>
     Popup Validation Example
   </h2>
@@ -115,10 +126,13 @@
       <textarea id="comments" class="validate form-control" data-validate="required"></textarea>
     </div>
     <div>
+      <label>Custom Class Validation:</label>
+      <div id="customClassValidation" class="form-control validate-class">Click to toggle custom class validation</div>
+    </div>
+    <div>
       <label for="agree">Agree to Some Terms:</label>
       <input type="checkbox" id="agree" class="validate form-control" data-validate="required" />
     </div>
-    <div id="customClassValidation" class="form-control validate-class">Click at me to toggle custom class validation</div>
     <button id="submitButton" type="submit">Submit</button>
   </form>
 
@@ -127,7 +141,7 @@
     validation.init("form");
 
     //
-    // Custom Class Validation Usage
+    // Custom Class Validation Example
     //
     validation.addClassValidation("my-class-invalid");
     document.getElementById("customClassValidation").addEventListener("click", e => {

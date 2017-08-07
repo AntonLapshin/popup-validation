@@ -4,7 +4,7 @@
 	(global.validation = factory());
 }(this, (function () { 'use strict';
 
-const Rules = {
+const RULES = {
   required: {
     message: "Required",
     method: el => {
@@ -38,102 +38,143 @@ const VALIDATE_POPUP = "validate-popup";
 const DATA_VALIDATE = "data-validate";
 const VALIDATE_ERROR = "validate-error";
 const ACTIVE = "active";
-const Events = ["change", "paste", "blur", "keyup"];
-const ValidationClassStyles = `
-.{0} {
-  border-color: #D10000 !important;
-}
-.{0}:before {
-  opacity: 1;
-}
-.{0}:after {
-  opacity: 1;
-}`;
+const OPTIONS = {
+  events: ["change", "paste", "blur", "keyup"]
+};
+const CUSTOM_CLASS_STYLES = `
+  .{0} {
+    border-color: #D10000 !important;
+  }
+  .{0}:before {
+    opacity: 1;
+  }
+  .{0}:after {
+    opacity: 1;
+  }`;
 
-//
-// Custom Validation Class
-//
-let _className = null;
+let _customClassName = null;
 
-const getMessage = el => {
-  return el
+const throttle = (fn, threshhold = 250, scope) => {
+  let last, deferTimer;
+  return () => {
+    const now = +new Date(),
+      args = arguments;
+    if (last && now < last + threshhold) {
+      clearTimeout(deferTimer);
+      deferTimer = setTimeout(() => {
+        last = now;
+        fn.apply(scope, args);
+      }, threshhold);
+    } else {
+      last = now;
+      fn.apply(scope, args);
+    }
+  };
+};
+
+const getMessage = input =>
+  input
     .getAttribute(DATA_VALIDATE)
     .split(",")
     .map(type => {
       return type.trim();
     })
     .filter(type => {
-      return !Rules[type].method(el);
+      return !RULES[type].method(input);
     })
     .map(type => {
-      return Rules[type].message;
+      return RULES[type].message;
     })
     .join(", ");
+
+const createPopup = input => {
+  let popup = document.createElement("div");
+  popup.classList.add(VALIDATE_POPUP);
+  const wrap = document.createElement("div");
+  wrap.appendChild(popup.cloneNode(true));
+  input.insertAdjacentHTML("beforebegin", wrap.innerHTML);
+  popup = input.previousElementSibling;
+  return popup;
+};
+
+const show = (input, message) => {
+  if (input.offsetWidth === 0 && input.offsetHeight === 0) {
+    return;
+  }
+
+  input.classList.toggle(VALIDATE_ERROR, true);
+  let popup = input.previousElementSibling;
+
+  if (!popup || !popup.matches("." + VALIDATE_POPUP)) {
+    //
+    // Create popup if it doesn't exist
+    //
+    popup = createPopup(input);
+  }
+  popup.innerHTML = message;
+  window.setTimeout(() => {
+    const left =
+      input.clientWidth < popup.clientWidth
+        ? ~~(input.offsetLeft + input.offsetWidth / 2 - 14) + 1
+        : input.offsetLeft + input.clientWidth - popup.clientWidth + 1;
+    const top = input.offsetTop;
+    popup.style.left = left + "px";
+    popup.style.top = top + "px";
+    popup.style.marginTop = -(popup.clientHeight + 8) + "px";
+    popup.classList.toggle(ACTIVE, true);
+    popup.classList.toggle(
+      "short-version",
+      input.clientWidth < popup.clientWidth
+    );
+  }, 0);
+};
+
+const hide = input => {
+  input.classList.toggle(VALIDATE_ERROR, false);
+  const popup = input.previousElementSibling;
+  if (popup && popup.matches("." + VALIDATE_POPUP)) {
+    popup.classList.toggle(ACTIVE, false);
+  }
+};
+
+const toggle = (input, message) => {
+  if (message) {
+    show(input, message);
+  } else {
+    hide(input);
+  }
 };
 
 const onAction = e => {
-  const el = e.target;
-  if (!el.matches("." + VALIDATE)) {
+  const input = e.target;
+  if (!input.matches("." + VALIDATE)) {
     return;
   }
-  const message = getMessage(el);
+  const message = getMessage(input);
 
-  el.classList.toggle(VALIDATE_ERROR, !!message);
-  let popup = el.previousElementSibling;
-  if (message) {
-    if (!popup || !popup.matches("." + VALIDATE_POPUP)) {
-      popup = document.createElement("div");
-      popup.classList.add(VALIDATE_POPUP);
-      const wrap = document.createElement("div");
-      wrap.appendChild(popup.cloneNode(true));
-      el.insertAdjacentHTML("beforebegin", wrap.innerHTML);
-      popup = el.previousElementSibling;
-    }
-    popup.innerHTML = message;
-    window.setTimeout(() => {
-      const left =
-        el.clientWidth < popup.clientWidth
-          ? el.offsetLeft + el.offsetWidth / 2 - 14
-          : el.offsetLeft + el.clientWidth - popup.clientWidth + 1;
-      const top = el.offsetTop;
-      popup.style.left = left + "px";
-      popup.style.top = top + "px";
-      popup.style.marginTop = -(popup.clientHeight + 8) + "px";
-      popup.classList.toggle(ACTIVE, true);
-      popup.classList.toggle(
-        "short-version",
-        el.clientWidth < popup.clientWidth
-      );
-    }, 0);
+  if (input.type === "radio") {
+    const name = input.name;
+    const rbs = document.querySelectorAll(`input[name="${name}"]`);
+    [].forEach.call(rbs, rb => toggle(rb, message));
   } else {
-    if (el.type === "radio") {
-      const name = el.name;
-      const rbs = document.querySelectorAll(`input[name="${name}"]`);
-      Array.prototype.forEach.call(rbs, el => {
-        const popup = el.previousElementSibling;
-        if (popup && popup.matches("." + VALIDATE_POPUP)) {
-          popup.classList.toggle(ACTIVE, false);
-        }
-      });
-    } else if (popup && popup.matches("." + VALIDATE_POPUP)) {
-      popup.classList.toggle(ACTIVE, false);
-    }
+    toggle(input, message);
   }
 };
 
 const getEl = (el = "body") =>
   typeof el === "string" ? document.querySelector(el) : el;
 
+const getInputs = el => el.querySelectorAll("." + VALIDATE);
+
 const onClick = e => {
-  const el = e.target;
-  if (!el.matches("." + VALIDATE_POPUP)) {
+  const popup = e.target;
+  if (!popup.matches("." + VALIDATE_POPUP)) {
     return;
   }
-  const next = el.nextElementSibling;
-  if (next.matches("." + VALIDATE)) {
-    next.classList.toggle(VALIDATE_ERROR, false);
+  const input = popup.nextElementSibling;
+  if (input.matches("." + VALIDATE)) {
+    hide(input);
   }
-  el.classList.toggle(ACTIVE, false);
 };
 
 const onSubmit = e => {
@@ -145,13 +186,19 @@ const onSubmit = e => {
   return false;
 };
 
+const onResize = throttle(() => {
+  [].forEach.call(document.querySelectorAll("." + VALIDATE_POPUP), popup => {
+    popup.classList.toggle(ACTIVE, false);
+  });
+}, 1000);
+
 const setupEventHandlers = (el, setup) => {
   el = getEl(el);
   const action = setup ? "addEventListener" : "removeEventListener";
-  const els = el.querySelectorAll("." + VALIDATE);
-  Array.prototype.forEach.call(els, el => {
-    Events.forEach(e => {
-      el[action](e, onAction);
+  const inputs = getInputs(el);
+  Array.prototype.forEach.call(inputs, input => {
+    OPTIONS.events.forEach(e => {
+      input[action](e, onAction);
     });
   });
 
@@ -160,19 +207,29 @@ const setupEventHandlers = (el, setup) => {
   if (el.nodeName === "FORM") {
     el[action]("submit", onSubmit);
   }
+
+  window[action]("resize", onResize);
 };
 
 const validation = {
   /**
    * Initialize the validation fields
    * 
-   * @param {Element|string} Container or specific form
+   * @param {Element|string} el Container or specific form
+   * @param {object} options [Optional] Set of the properties
+   *  - events: [string]
    * @returns {object} validation instance (chain call)
    */
-  init: el => {
+  init: (el, options) => {
+    Object.assign(OPTIONS, options);
     setupEventHandlers(el, true);
     return validation;
   },
+
+  /**
+   * Predefined set of the Rules
+   */
+  rules: RULES,
 
   /**
    * Deactivate the validation fields
@@ -194,14 +251,8 @@ const validation = {
    */
   hide: el => {
     el = getEl(el);
-    const els = el.querySelectorAll("." + VALIDATE_POPUP);
-    Array.prototype.forEach.call(els, el => {
-      el.classList.toggle(ACTIVE, false);
-      const next = el.nextElementSibling;
-      if (next.matches("." + VALIDATE)) {
-        next.classList.toggle(VALIDATE_ERROR, false);
-      }
-    });
+    const inputs = getInputs(el);
+    Array.prototype.forEach.call(inputs, input => hide(input));
     return validation;
   },
 
@@ -213,12 +264,8 @@ const validation = {
    */
   highlight: el => {
     el = getEl(el);
-    const els = el.querySelectorAll("." + VALIDATE);
-    Array.prototype.forEach.call(els, el => {
-      const event = document.createEvent("HTMLEvents");
-      event.initEvent("blur", true, false);
-      el.dispatchEvent(event);
-    });
+    const inputs = getInputs(el);
+    Array.prototype.forEach.call(inputs, input => onAction({ target: input }));
     return validation;
   },
 
@@ -230,11 +277,14 @@ const validation = {
    */
   isValid: el => {
     el = getEl(el);
-    const els = el.querySelectorAll("." + VALIDATE);
-    let valid = Array.prototype.every.call(els, el => {
-      return !getMessage(el);
+    const inputs = getInputs(el);
+    let valid = Array.prototype.every.call(inputs, input => {
+      return !getMessage(input);
     });
-    if (_className && el.querySelectorAll("." + _className).length > 0) {
+    if (
+      _customClassName &&
+      el.querySelectorAll("." + _customClassName).length > 0
+    ) {
       valid = false;
     }
     return valid;
@@ -252,21 +302,6 @@ const validation = {
   },
 
   /**
-   * Returns the set of the predefined rules
-   * 
-   * @returns {object} Rules
-   * 
-   * ruleName: {
-   *   message: "Message when element didn't pass the rule",
-   *   method: el => boolean
-   * }
-   * 
-   */
-  getRules: () => {
-    return Rules;
-  },
-
-  /**
    * Add class validation. For external libraries that can 
    * set/remove className of the element
    * 
@@ -279,11 +314,11 @@ const validation = {
    * @returns {object} validation instance (chain call)
    */
   addClassValidation: className => {
-    const styles = ValidationClassStyles.replace(/\{0\}/gi, className);
+    const styles = CUSTOM_CLASS_STYLES.replace(/\{0\}/gi, className);
     const styleTag = document.createElement("style");
     styleTag.innerHTML = styles;
     document.head.appendChild(styleTag);
-    _className = className;
+    _customClassName = className;
     return validation;
   }
 };

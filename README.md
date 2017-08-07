@@ -23,33 +23,54 @@ Read [API](#API)
 HTML
 
 ```html
-  <link href="validation.css" rel="stylesheet">
-  <script src="validation.es6.js"></script>
-  <!-- Minified ES5 version -->
-  <!-- <script src="validation.min.js"></script> -->
+<link href="validation.css" rel="stylesheet">
+<script src="validation.min.js"></script> 
 
-  <div>
-    <label for="email">Email:</label>
-    <input type="email" id="email" class="validate form-control" data-validate="required, email" />
-  </div>  
+<div>
+  <label for="email">Email:</label>
+  <input type="email" id="email" class="validate form-control" 
+         data-validate="required,email" />
+</div>  
 ```
 
-JavaScript
+JS
+
+Initialization
+
+* Track input fields inside of the BODY
 
 ```js
 validation.init();
+```
 
-// If you have a form just pass form selector or element
-// Submit event will be prevented if there are any errors
-validation.init("#myForm"); 
+* Track input fields inside of a container of a form. Submit event will be prevented if there are any errors
 
-validation.highlight(); // show errors
+```js
+validation.init("#myForm");
+```
 
-validation.hide(); // hide errors
+* Options. Trigger Events
 
-validation.isValid(); // check if container is valid (body by default)
+```js
+validation.init("#myForm", {
+  events: ["change", "paste", "keyup"]
+});
+```
 
-validation.validate(); // check if cotnainer is valid (body by default) + highlight
+Usage
+
+```js
+// Show errors
+validation.highlight();
+
+// Hide errors
+validation.hide();
+
+// Check if container is valid (body by default)
+validation.isValid();
+
+// Check if cotnainer is valid (body by default) + highlight
+validation.validate();
 ```
 
 ## Custom Class Validation
@@ -63,6 +84,8 @@ HTML
   Click at me to toggle custom class validation
 </div> 
 ```
+
+JS
 
 ```js
 validation.addClassValidation("my-class-invalid");
@@ -84,7 +107,7 @@ document.getElementById("customClassValidation").addEventListener("click", e => 
 
 # API
 
-## validation.init(el) => <code>self</code>
+## validation.init(el, options) => <code>self</code>
 Initialize the validation fields inside of the `el` container. If `el` is a `<form>` element then submit event will be prevented if there are any errors
 
 **Returns**: <code>object</code> - Self validation instance for chain calls
@@ -92,6 +115,15 @@ Initialize the validation fields inside of the `el` container. If `el` is a `<fo
 | Param | Type | Description |
 | --- | --- | --- |
 | el | <code>Element</code> | Container or `<form>` Element |
+| options | <code>Object</code> | [Optional] Set of the properties |
+
+Default Options
+
+```js
+{
+  events: ["change", "paste", "blur", "keyup"]
+}
+```
 
 Affects all input fields with `validate` class
 
@@ -149,10 +181,8 @@ Validate all input fields inside of the `el` container
 | --- | --- | --- |
 | el | <code>Element</code> | Container or `<form>` Element |
 
-## validation.getRules() => <code>object</code>
-Get the set of the predefined rules
-
-**Returns**: <code>object</code> - The set of the predefined rules
+## validation.rules <code>object</code>
+The set of the predefined rules
 
 ### Rule signature
 el => <code>boolean</code>
@@ -165,17 +195,20 @@ el => <code>boolean</code>
 
 <a name="RULES"></a>
 
-## Example of extending Rules
+## Example of extending rules
+
+JS
 
 ```js
-const Rules = validation.getRules();
-Rules["integer"] = {
+validation.rules["integer"] = {
   message: "Value is not an integer",
   method: el => {
     return el.value.length === 0 || !isNaN(parseInt(el.value, 10));
   }    
 }
 ```
+
+HTML
 
 ```html
 <input class="validate" data-validate="required,integer" />
