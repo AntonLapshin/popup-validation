@@ -10,17 +10,17 @@ const OPTIONS = {
   events: ["change", "paste", "blur", "keyup"]
 };
 const CUSTOM_CLASS_STYLES = `
-  .{0} {
+  {0} {
     border-color: #D10000 !important;
   }
-  .{0}:before {
+  {0}:before {
     opacity: 1;
   }
-  .{0}:after {
+  {0}:after {
     opacity: 1;
   }`;
 
-let _customClassName = null;
+let _customSelector = null;
 
 const throttle = (fn, threshhold = 250, scope) => {
   let last, deferTimer;
@@ -250,8 +250,8 @@ const validation = {
       return !getMessage(input);
     });
     if (
-      _customClassName &&
-      el.querySelectorAll("." + _customClassName).length > 0
+      _customSelector &&
+      el.querySelectorAll(_customSelector).length > 0
     ) {
       valid = false;
     }
@@ -278,15 +278,17 @@ const validation = {
    * input fieldan error detects an error, More info here:
    * https://developers.braintreepayments.com/guides/hosted-fields/styling/javascript/v2
    * 
-   * @param {string} className Class name that indicates that the field is invalid
+   * @param {string} selector Selector that indicates that the field is invalid
    * @returns {object} validation instance (chain call)
    */
-  addClassValidation: className => {
-    const styles = CUSTOM_CLASS_STYLES.replace(/\{0\}/gi, className);
+  addClassValidation: selector => {
+    const styles = selector.split(',').map(s => {
+      return CUSTOM_CLASS_STYLES.replace(/\{0\}/gi, s);
+    }).join('');
     const styleTag = document.createElement("style");
     styleTag.innerHTML = styles;
     document.head.appendChild(styleTag);
-    _customClassName = className;
+    _customSelector = selector;
     return validation;
   }
 };

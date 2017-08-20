@@ -88,11 +88,11 @@ HTML
 JS
 
 ```js
-validation.addClassValidation("my-class-invalid");
+validation.addClassValidation(".my-class-invalid");
 
 // Test
 document.getElementById("customClassValidation").addEventListener("click", e => {
-  e.target.classList.toggle("my-class-invalid");
+  e.target.classList.toggle(".my-class-invalid");
 });
 ```
 
@@ -214,7 +214,7 @@ HTML
 <input class="validate" data-validate="required,integer" />
 ```
 
-## validation.addClassValidation(className) => <code>self</code>
+## validation.addClassValidation(selector) => <code>self</code>
 Add class validation. For external libraries that can set/remove className of the element. For instance, braintree-hosted-fields-invalid class is set by braintree client library when iframe with the input field detects an error, More info here:
 https://developers.braintreepayments.com/guides/hosted-fields/styling/javascript/v2
 
@@ -222,7 +222,7 @@ https://developers.braintreepayments.com/guides/hosted-fields/styling/javascript
 
 | Param | Type | Description |
 | --- | --- | --- |
-| className | <code>string</code> | Class name that indicates that the field is invalid |
+| selector | <code>string</code> | Selector that indicates that the field is invalid |
 
 ---
 
