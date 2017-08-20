@@ -92,7 +92,7 @@ validation.addClassValidation(".my-class-invalid");
 
 // Test
 document.getElementById("customClassValidation").addEventListener("click", e => {
-  e.target.classList.toggle(".my-class-invalid");
+  e.target.classList.toggle("my-class-invalid");
 });
 ```
 
