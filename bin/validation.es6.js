@@ -52,7 +52,7 @@ const CUSTOM_CLASS_STYLES = `
     opacity: 1;
   }`;
 
-let _customSelector = null;
+let _customSelector = "";
 
 const throttle = (fn, threshhold = 250, scope) => {
   let last, deferTimer;
@@ -320,7 +320,7 @@ const validation = {
     const styleTag = document.createElement("style");
     styleTag.innerHTML = styles;
     document.head.appendChild(styleTag);
-    _customSelector = selector;
+    _customSelector = _customSelector + (_customSelector === "" ? "" : ",") + selector;
     return validation;
   }
 };
