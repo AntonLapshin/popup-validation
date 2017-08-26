@@ -97,12 +97,20 @@ const createPopup = input => {
   return popup;
 };
 
+const forceToggleClass = (el, className, force) => {
+  if (force && !el.classList.contains(className)){
+    el.classList.add(className);
+  } else if (!force && el.classList.contains(className)){
+    el.classList.remove(className);
+  }
+};
+
 const show = (input, message) => {
   if (input.offsetWidth === 0 && input.offsetHeight === 0) {
     return;
   }
 
-  input.classList.toggle(VALIDATE_ERROR, true);
+  forceToggleClass(input, VALIDATE_ERROR, true);
   let popup = input.previousElementSibling;
 
   if (!popup || !popup.matches("." + VALIDATE_POPUP)) {
@@ -121,19 +129,16 @@ const show = (input, message) => {
     popup.style.left = left + "px";
     popup.style.top = top + "px";
     popup.style.marginTop = -(popup.clientHeight + 8) + "px";
-    popup.classList.toggle(ACTIVE, true);
-    popup.classList.toggle(
-      "short-version",
-      input.clientWidth < popup.clientWidth
-    );
+    forceToggleClass(popup, ACTIVE, true);
+    forceToggleClass(popup, "short-version", input.clientWidth < popup.clientWidth);
   }, 0);
 };
 
 const hide = input => {
-  input.classList.toggle(VALIDATE_ERROR, false);
+  forceToggleClass(input, VALIDATE_ERROR, false);
   const popup = input.previousElementSibling;
   if (popup && popup.matches("." + VALIDATE_POPUP)) {
-    popup.classList.toggle(ACTIVE, false);
+    forceToggleClass(popup, ACTIVE, false);
   }
 };
 
@@ -188,7 +193,7 @@ const onSubmit = e => {
 
 const onResize = throttle(() => {
   [].forEach.call(document.querySelectorAll("." + VALIDATE_POPUP), popup => {
-    popup.classList.toggle(ACTIVE, false);
+    forceToggleClass(popup, ACTIVE, false);
   });
 }, 1000);
 
