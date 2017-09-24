@@ -51,6 +51,7 @@ const CUSTOM_CLASS_STYLES = `
   {0}:after {
     opacity: 1;
   }`;
+const document = window.document;
 
 let _customSelector = "";
 
@@ -98,9 +99,9 @@ const createPopup = input => {
 };
 
 const forceToggleClass = (el, className, force) => {
-  if (force && !el.classList.contains(className)){
+  if (force && !el.classList.contains(className)) {
     el.classList.add(className);
-  } else if (!force && el.classList.contains(className)){
+  } else if (!force && el.classList.contains(className)) {
     el.classList.remove(className);
   }
 };
@@ -130,7 +131,11 @@ const show = (input, message) => {
     popup.style.top = top + "px";
     popup.style.marginTop = -(popup.clientHeight + 8) + "px";
     forceToggleClass(popup, ACTIVE, true);
-    forceToggleClass(popup, "short-version", input.clientWidth < popup.clientWidth);
+    forceToggleClass(
+      popup,
+      "short-version",
+      input.clientWidth < popup.clientWidth
+    );
   }, 0);
 };
 
@@ -167,7 +172,7 @@ const onAction = e => {
 };
 
 const getEl = (el = "body") =>
-  typeof el === "string" ? document.querySelector(el) : el;
+  typeof el === "string" ? document.querySelector(el) || document.body : el;
 
 const getInputs = el => el.querySelectorAll("." + VALIDATE);
 
@@ -286,10 +291,7 @@ const validation = {
     let valid = Array.prototype.every.call(inputs, input => {
       return !getMessage(input);
     });
-    if (
-      _customSelector &&
-      el.querySelectorAll(_customSelector).length > 0
-    ) {
+    if (_customSelector && el.querySelectorAll(_customSelector).length > 0) {
       valid = false;
     }
     return valid;
@@ -319,13 +321,17 @@ const validation = {
    * @returns {object} validation instance (chain call)
    */
   addClassValidation: selector => {
-    const styles = selector.split(',').map(s => {
-      return CUSTOM_CLASS_STYLES.replace(/\{0\}/gi, s);
-    }).join('');
+    const styles = selector
+      .split(",")
+      .map(s => {
+        return CUSTOM_CLASS_STYLES.replace(/\{0\}/gi, s);
+      })
+      .join("");
     const styleTag = document.createElement("style");
     styleTag.innerHTML = styles;
     document.head.appendChild(styleTag);
-    _customSelector = _customSelector + (_customSelector === "" ? "" : ",") + selector;
+    _customSelector =
+      _customSelector + (_customSelector === "" ? "" : ",") + selector;
     return validation;
   }
 };

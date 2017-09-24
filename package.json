@@ -1,6 +1,6 @@
 {
   "name": "popup-validation",
-  "version": "2.1.5",
+  "version": "2.1.6",
   "description": "Pure JavaScript/CSS library for validating DOM input fields",
   "main": "index.js",
   "scripts": {
