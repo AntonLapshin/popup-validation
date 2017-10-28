@@ -1,3 +1,7 @@
+const regex = {
+  email: /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+};
+
 export const RULES = {
   required: {
     message: "Required",
@@ -16,13 +20,13 @@ export const RULES = {
   },
   email: {
     message: "E-mail is wrong",
-    method: el => {
-      return (
-        el.value === "" ||
-        /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
-          el.value
-        )
-      );
-    }
+    method: el => el.value === "" || regex.email.test(el.value)
+  },
+  emails: {
+    message: "E-mail is wrong",
+    method: el =>
+      el.value === "" ||
+      el.value.split(",").every(v => regex.email.test(v)) ||
+      el.value.split(";").every(v => regex.email.test(v))
   }
 };

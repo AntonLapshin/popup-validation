@@ -10,7 +10,8 @@ export default {
   plugins: [
     resolve(),
     scss({
-      output: "bin/validation.css"
+      output: "bin/validation.min.css",
+      outputStyle: "compressed"
     }),
     babel({
       babelrc: false,

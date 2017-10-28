@@ -10,8 +10,8 @@
     "jsdoc2md": "./node_modules/.bin/jsdoc2md src/*.js > api.md",
     "commit": "./node_modules/.bin/git-cz",
     "build-es6": "./node_modules/.bin/rollup -c rollup.es6.config.js",
-    "build-prod": "./node_modules/.bin/rollup -c rollup.config.js",
-    "build": "npm run build-es6 && npm run build-prod",
+    "build-es5": "./node_modules/.bin/rollup -c rollup.es5.config.js",
+    "build": "npm run build-es6 && npm run build-es5",
     "deploy": "./node_modules/.bin/gh-pages -d bin"
   },
   "repository": {

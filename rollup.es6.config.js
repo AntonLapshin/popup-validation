@@ -8,7 +8,8 @@ export default {
   plugins: [
     resolve(),
     scss({
-      output: "bin/validation.css"
+      output: "bin/validation.min.css",
+      outputStyle: "compressed"
     })
   ],
   dest: "bin/validation.es6.js"

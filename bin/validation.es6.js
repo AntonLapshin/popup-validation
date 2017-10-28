@@ -4,6 +4,10 @@
 	(global.validation = factory());
 }(this, (function () { 'use strict';
 
+const regex = {
+  email: /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+};
+
 const RULES = {
   required: {
     message: "Required",
@@ -22,14 +26,14 @@ const RULES = {
   },
   email: {
     message: "E-mail is wrong",
-    method: el => {
-      return (
-        el.value === "" ||
-        /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
-          el.value
-        )
-      );
-    }
+    method: el => el.value === "" || regex.email.test(el.value)
+  },
+  emails: {
+    message: "E-mail is wrong",
+    method: el =>
+      el.value === "" ||
+      el.value.split(",").every(v => regex.email.test(v)) ||
+      el.value.split(";").every(v => regex.email.test(v))
   }
 };
 
@@ -77,15 +81,9 @@ const getMessage = input =>
   input
     .getAttribute(DATA_VALIDATE)
     .split(",")
-    .map(type => {
-      return type.trim();
-    })
-    .filter(type => {
-      return !RULES[type].method(input);
-    })
-    .map(type => {
-      return RULES[type].message;
-    })
+    .map(type => type.trim())
+    .filter(type => !RULES[type].method(input))
+    .map(type => RULES[type].message)
     .join(", ");
 
 const createPopup = input => {
@@ -197,20 +195,18 @@ const onSubmit = e => {
 };
 
 const onResize = throttle(() => {
-  [].forEach.call(document.querySelectorAll("." + VALIDATE_POPUP), popup => {
-    forceToggleClass(popup, ACTIVE, false);
-  });
+  [].forEach.call(document.querySelectorAll("." + VALIDATE_POPUP), popup =>
+    forceToggleClass(popup, ACTIVE, false)
+  );
 }, 1000);
 
 const setupEventHandlers = (el, setup) => {
   el = getEl(el);
   const action = setup ? "addEventListener" : "removeEventListener";
   const inputs = getInputs(el);
-  Array.prototype.forEach.call(inputs, input => {
-    OPTIONS.events.forEach(e => {
-      input[action](e, onAction);
-    });
-  });
+  [].forEach.call(inputs, input =>
+    OPTIONS.events.forEach(e => input[action](e, onAction))
+  );
 
   document[action]("click", onClick);
 
@@ -262,7 +258,7 @@ const validation = {
   hide: el => {
     el = getEl(el);
     const inputs = getInputs(el);
-    Array.prototype.forEach.call(inputs, input => hide(input));
+    [].forEach.call(inputs, input => hide(input));
     return validation;
   },
 
@@ -275,7 +271,7 @@ const validation = {
   highlight: el => {
     el = getEl(el);
     const inputs = getInputs(el);
-    Array.prototype.forEach.call(inputs, input => onAction({ target: input }));
+    [].forEach.call(inputs, input => onAction({ target: input }));
     return validation;
   },
 
@@ -288,9 +284,7 @@ const validation = {
   isValid: el => {
     el = getEl(el);
     const inputs = getInputs(el);
-    let valid = Array.prototype.every.call(inputs, input => {
-      return !getMessage(input);
-    });
+    let valid = [].every.call(inputs, input => !getMessage(input));
     if (_customSelector && el.querySelectorAll(_customSelector).length > 0) {
       valid = false;
     }
@@ -323,9 +317,7 @@ const validation = {
   addClassValidation: selector => {
     const styles = selector
       .split(",")
-      .map(s => {
-        return CUSTOM_CLASS_STYLES.replace(/\{0\}/gi, s);
-      })
+      .map(s => CUSTOM_CLASS_STYLES.replace(/\{0\}/gi, s))
       .join("");
     const styleTag = document.createElement("style");
     styleTag.innerHTML = styles;

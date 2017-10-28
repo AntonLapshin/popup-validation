@@ -23,7 +23,7 @@ Read [API](#API)
 HTML
 
 ```html
-<link href="validation.css" rel="stylesheet">
+<link href="validation.min.css" rel="stylesheet">
 <script src="validation.min.js"></script> 
 
 <div>
@@ -100,6 +100,7 @@ document.getElementById("customClassValidation").addEventListener("click", e => 
 
 * required
 * email
+* emails ("," or ";" delimiter)
 
 > The set of rules can be easily extended. Please take a look at the [example](#RULES)
 
@@ -203,7 +204,7 @@ JS
 validation.rules["integer"] = {
   message: "Value is not an integer",
   method: el => {
-    return el.value.length === 0 || !isNaN(parseInt(el.value, 10));
+    return el.value === "" || /^-?\d+$/.test(el.value);
   }    
 }
 ```
