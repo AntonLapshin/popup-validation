@@ -26,14 +26,13 @@ const RULES = {
   },
   email: {
     message: "E-mail is wrong",
-    method: el => el.value === "" || regex.email.test(el.value)
+    method: el => el.value === "" || regex.email.test(el.value.trim())
   },
   emails: {
     message: "E-mail is wrong",
     method: el =>
       el.value === "" ||
-      el.value.split(",").every(v => regex.email.test(v)) ||
-      el.value.split(";").every(v => regex.email.test(v))
+      el.value.split(/;|,/).every(v => regex.email.test(v.trim()))
   }
 };
 
