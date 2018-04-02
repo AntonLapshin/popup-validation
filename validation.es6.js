@@ -4,6 +4,10 @@
 	(global.validation = factory());
 }(this, (function () { 'use strict';
 
+const regex = {
+  email: /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+};
+
 const RULES = {
   required: {
     message: "Required",
@@ -22,14 +26,13 @@ const RULES = {
   },
   email: {
     message: "E-mail is wrong",
-    method: el => {
-      return (
-        el.value === "" ||
-        /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
-          el.value
-        )
-      );
-    }
+    method: el => el.value === "" || regex.email.test(el.value.trim())
+  },
+  emails: {
+    message: "E-mail is wrong",
+    method: el =>
+      el.value === "" ||
+      el.value.split(/;|,/).every(v => regex.email.test(v.trim()))
   }
 };
 
@@ -46,13 +49,15 @@ const CUSTOM_CLASS_STYLES = `
     border-color: #D10000 !important;
   }
   {0}:before {
-    opacity: 1;
+    opacity: 1 !important;
+    {1}
   }
   {0}:after {
-    opacity: 1;
+    opacity: 1 !important;
   }`;
+const document = window.document;
 
-let _customSelector = null;
+let _customSelector = "";
 
 const throttle = (fn, threshhold = 250, scope) => {
   let last, deferTimer;
@@ -76,15 +81,9 @@ const getMessage = input =>
   input
     .getAttribute(DATA_VALIDATE)
     .split(",")
-    .map(type => {
-      return type.trim();
-    })
-    .filter(type => {
-      return !RULES[type].method(input);
-    })
-    .map(type => {
-      return RULES[type].message;
-    })
+    .map(type => type.trim())
+    .filter(type => !RULES[type].method(input))
+    .map(type => RULES[type].message)
     .join(", ");
 
 const createPopup = input => {
@@ -97,12 +96,20 @@ const createPopup = input => {
   return popup;
 };
 
+const forceToggleClass = (el, className, force) => {
+  if (force && !el.classList.contains(className)) {
+    el.classList.add(className);
+  } else if (!force && el.classList.contains(className)) {
+    el.classList.remove(className);
+  }
+};
+
 const show = (input, message) => {
   if (input.offsetWidth === 0 && input.offsetHeight === 0) {
     return;
   }
 
-  input.classList.toggle(VALIDATE_ERROR, true);
+  forceToggleClass(input, VALIDATE_ERROR, true);
   let popup = input.previousElementSibling;
 
   if (!popup || !popup.matches("." + VALIDATE_POPUP)) {
@@ -121,8 +128,9 @@ const show = (input, message) => {
     popup.style.left = left + "px";
     popup.style.top = top + "px";
     popup.style.marginTop = -(popup.clientHeight + 8) + "px";
-    popup.classList.toggle(ACTIVE, true);
-    popup.classList.toggle(
+    forceToggleClass(popup, ACTIVE, true);
+    forceToggleClass(
+      popup,
       "short-version",
       input.clientWidth < popup.clientWidth
     );
@@ -130,10 +138,10 @@ const show = (input, message) => {
 };
 
 const hide = input => {
-  input.classList.toggle(VALIDATE_ERROR, false);
+  forceToggleClass(input, VALIDATE_ERROR, false);
   const popup = input.previousElementSibling;
   if (popup && popup.matches("." + VALIDATE_POPUP)) {
-    popup.classList.toggle(ACTIVE, false);
+    forceToggleClass(popup, ACTIVE, false);
   }
 };
 
@@ -162,7 +170,7 @@ const onAction = e => {
 };
 
 const getEl = (el = "body") =>
-  typeof el === "string" ? document.querySelector(el) : el;
+  typeof el === "string" ? document.querySelector(el) || document.body : el;
 
 const getInputs = el => el.querySelectorAll("." + VALIDATE);
 
@@ -187,20 +195,18 @@ const onSubmit = e => {
 };
 
 const onResize = throttle(() => {
-  [].forEach.call(document.querySelectorAll("." + VALIDATE_POPUP), popup => {
-    popup.classList.toggle(ACTIVE, false);
-  });
+  [].forEach.call(document.querySelectorAll("." + VALIDATE_POPUP), popup =>
+    forceToggleClass(popup, ACTIVE, false)
+  );
 }, 1000);
 
 const setupEventHandlers = (el, setup) => {
   el = getEl(el);
   const action = setup ? "addEventListener" : "removeEventListener";
   const inputs = getInputs(el);
-  Array.prototype.forEach.call(inputs, input => {
-    OPTIONS.events.forEach(e => {
-      input[action](e, onAction);
-    });
-  });
+  [].forEach.call(inputs, input =>
+    OPTIONS.events.forEach(e => input[action](e, onAction))
+  );
 
   document[action]("click", onClick);
 
@@ -214,7 +220,7 @@ const setupEventHandlers = (el, setup) => {
 const validation = {
   /**
    * Initialize the validation fields
-   * 
+   *
    * @param {Element|string} el Container or specific form
    * @param {object} options [Optional] Set of the properties
    *  - events: [string]
@@ -233,7 +239,7 @@ const validation = {
 
   /**
    * Deactivate the validation fields
-   * 
+   *
    * @param {Element|string} Container or specific form
    * @returns {object} validation instance (chain call)
    */
@@ -245,54 +251,49 @@ const validation = {
 
   /**
    * Hide all opened popups inside of the containers
-   * 
+   *
    * @param {Element|string} Container or specific form
    * @returns {object} validation instance (chain call)
    */
   hide: el => {
     el = getEl(el);
     const inputs = getInputs(el);
-    Array.prototype.forEach.call(inputs, input => hide(input));
+    [].forEach.call(inputs, input => hide(input));
     return validation;
   },
 
   /**
    * Show error popups inside of the container
-   * 
+   *
    * @param {Element} el Container
    * @returns {object} validation instance (chain call)
    */
   highlight: el => {
     el = getEl(el);
     const inputs = getInputs(el);
-    Array.prototype.forEach.call(inputs, input => onAction({ target: input }));
+    [].forEach.call(inputs, input => onAction({ target: input }));
     return validation;
   },
 
   /**
    * Check if all input fields inside of the container are valid
-   * 
+   *
    * @param {Element} el Container
    * @returns {boolean} True if all input fields inside of the container are valid
    */
   isValid: el => {
     el = getEl(el);
     const inputs = getInputs(el);
-    let valid = Array.prototype.every.call(inputs, input => {
-      return !getMessage(input);
-    });
-    if (
-      _customSelector &&
-      el.querySelectorAll(_customSelector).length > 0
-    ) {
+    let valid = [].every.call(inputs, input => !getMessage(input));
+    if (_customSelector && el.querySelectorAll(_customSelector).length > 0) {
       valid = false;
     }
     return valid;
   },
 
   /**
-   * Validate all input fields in the DOM container 
-   * 
+   * Validate all input fields in the DOM container
+   *
    * @param {Element} el Container
    * @returns {boolean} True if all input fields inside of the container are valid
    */
@@ -302,25 +303,33 @@ const validation = {
   },
 
   /**
-   * Add class validation. For external libraries that can 
+   * Add class validation. For external libraries that can
    * set/remove className of the element
-   * 
-   * For instance, braintree-hosted-fields-invalid class is 
-   * set by braintree client library when iframe with the 
+   *
+   * For instance, braintree-hosted-fields-invalid class is
+   * set by braintree client library when iframe with the
    * input fieldan error detects an error, More info here:
    * https://developers.braintreepayments.com/guides/hosted-fields/styling/javascript/v2
-   * 
+   *
    * @param {string} selector Selector that indicates that the field is invalid
+   * @param {string} Optional: message. "Invalid" by default
    * @returns {object} validation instance (chain call)
    */
-  addClassValidation: selector => {
-    const styles = selector.split(',').map(s => {
-      return CUSTOM_CLASS_STYLES.replace(/\{0\}/gi, s);
-    }).join('');
+  addClassValidation: (selector, msg = 'Invalid') => {
+    const styles = selector
+      .split(",")
+      .map(s =>
+        CUSTOM_CLASS_STYLES.replace(/\{0\}/gi, s).replace(
+          /\{1\}/gi,
+          !msg ? "" : `content: '${msg}' !important;`
+        )
+      )
+      .join("");
     const styleTag = document.createElement("style");
     styleTag.innerHTML = styles;
     document.head.appendChild(styleTag);
-    _customSelector = selector;
+    _customSelector =
+      _customSelector + (_customSelector === "" ? "" : ",") + selector;
     return validation;
   }
 };
