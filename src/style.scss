@@ -59,12 +59,12 @@ $bgcolor: #d10000;
 }
 
 .validate-class:before {
-  content: 'Invalid';
   background-color: #d10000;
   color: white;
   font-size: 12px;
   line-height: 1;
   padding: 8px 12px;
+  white-space: nowrap;
 }
 
 .validate-class:after {

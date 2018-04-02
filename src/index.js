@@ -14,10 +14,11 @@ const CUSTOM_CLASS_STYLES = `
     border-color: #D10000 !important;
   }
   {0}:before {
-    opacity: 1;
+    opacity: 1 !important;
+    {1}
   }
   {0}:after {
-    opacity: 1;
+    opacity: 1 !important;
   }`;
 const document = window.document;
 
@@ -184,7 +185,7 @@ const setupEventHandlers = (el, setup) => {
 const validation = {
   /**
    * Initialize the validation fields
-   * 
+   *
    * @param {Element|string} el Container or specific form
    * @param {object} options [Optional] Set of the properties
    *  - events: [string]
@@ -203,7 +204,7 @@ const validation = {
 
   /**
    * Deactivate the validation fields
-   * 
+   *
    * @param {Element|string} Container or specific form
    * @returns {object} validation instance (chain call)
    */
@@ -215,7 +216,7 @@ const validation = {
 
   /**
    * Hide all opened popups inside of the containers
-   * 
+   *
    * @param {Element|string} Container or specific form
    * @returns {object} validation instance (chain call)
    */
@@ -228,7 +229,7 @@ const validation = {
 
   /**
    * Show error popups inside of the container
-   * 
+   *
    * @param {Element} el Container
    * @returns {object} validation instance (chain call)
    */
@@ -241,7 +242,7 @@ const validation = {
 
   /**
    * Check if all input fields inside of the container are valid
-   * 
+   *
    * @param {Element} el Container
    * @returns {boolean} True if all input fields inside of the container are valid
    */
@@ -256,8 +257,8 @@ const validation = {
   },
 
   /**
-   * Validate all input fields in the DOM container 
-   * 
+   * Validate all input fields in the DOM container
+   *
    * @param {Element} el Container
    * @returns {boolean} True if all input fields inside of the container are valid
    */
@@ -267,21 +268,27 @@ const validation = {
   },
 
   /**
-   * Add class validation. For external libraries that can 
+   * Add class validation. For external libraries that can
    * set/remove className of the element
-   * 
-   * For instance, braintree-hosted-fields-invalid class is 
-   * set by braintree client library when iframe with the 
+   *
+   * For instance, braintree-hosted-fields-invalid class is
+   * set by braintree client library when iframe with the
    * input fieldan error detects an error, More info here:
    * https://developers.braintreepayments.com/guides/hosted-fields/styling/javascript/v2
-   * 
+   *
    * @param {string} selector Selector that indicates that the field is invalid
+   * @param {string} Optional: message. "Invalid" by default
    * @returns {object} validation instance (chain call)
    */
-  addClassValidation: selector => {
+  addClassValidation: (selector, msg = 'Invalid') => {
     const styles = selector
       .split(",")
-      .map(s => CUSTOM_CLASS_STYLES.replace(/\{0\}/gi, s))
+      .map(s =>
+        CUSTOM_CLASS_STYLES.replace(/\{0\}/gi, s).replace(
+          /\{1\}/gi,
+          !msg ? "" : `content: '${msg}' !important;`
+        )
+      )
       .join("");
     const styleTag = document.createElement("style");
     styleTag.innerHTML = styles;
