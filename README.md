@@ -71,6 +71,12 @@ validation.isValid();
 
 // Check if cotnainer is valid (body by default) + highlight
 validation.validate();
+
+// Show a custom popup message on a DOM element
+validation.showOne(el, message);
+
+// Hide the popup message from the DOM element
+validation.hideOne(el);
 ```
 
 ## Custom Class Validation
@@ -181,6 +187,21 @@ Validate all input fields inside of the `el` container
 | Param | Type | Description |
 | --- | --- | --- |
 | el | <code>Element</code> | Container or `<form>` Element |
+
+## validation.showOne(el, message) => <code>void</code>
+Show a custom popup message on a DOM element
+
+| Param | Type | Description |
+| --- | --- | --- |
+| el | <code>Element</code> | DOM element |
+| message | <code>string</code> | Custom message |
+
+## validation.hideOne(el) => <code>void</code>
+Hide the shown custom popup message from the DOM element
+
+| Param | Type | Description |
+| --- | --- | --- |
+| el | <code>Element</code> | DOM element |
 
 ## validation.rules <code>object</code>
 The set of the predefined rules

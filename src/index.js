@@ -296,7 +296,10 @@ const validation = {
     _customSelector =
       _customSelector + (_customSelector === "" ? "" : ",") + selector;
     return validation;
-  }
+  },
+
+  showOne: show,
+  hideOne: hide
 };
 
 export default validation;
