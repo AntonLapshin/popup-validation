@@ -65,7 +65,7 @@
       margin: 1em;
     }
 
-    #customClassValidation {
+    #customClassValidation, #manualValidation {
       height: 30px;
       width: 100%;
       border: 1px solid #bbb;
@@ -124,12 +124,16 @@
     </div>
     <div>
       <label>Custom Class Validation:</label>
-      <div id="customClassValidation" class="form-control validate-class">Click to toggle custom class validation</div>
+      <div id="customClassValidation" class="form-control">Click to toggle custom class validation</div>
     </div>
     <div>
       <label for="agree">Agree to Some Terms:</label>
       <input type="checkbox" id="agree" class="validate form-control" data-validate="required" />
     </div>
+    <div>
+      <label>Manual Custom Popup:</label>
+      <div id="manualValidation" class="form-control validate-class">Click to manually show a popup</div>
+    </div>    
     <button id="submitButton" type="submit">Submit</button>
   </form>
 
@@ -140,9 +144,16 @@
     //
     // Custom Class Validation Example
     //
-    validation.addClassValidation(".my-class-invalid", "Field is invalid");
+    validation.addClassValidation("#customClassValidation", ".my-class-invalid", "Field is invalid");
     document.getElementById("customClassValidation").addEventListener("click", e => {
       e.target.classList.toggle("my-class-invalid");
+    });
+
+    //
+    // Manual Validation Example
+    //
+    document.getElementById("manualValidation").addEventListener("click", e => {
+      validation.show("#manualValidation", "My custom message");
     });
   </script>
 </body>
