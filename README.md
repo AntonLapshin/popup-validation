@@ -63,8 +63,8 @@ Usage
 // Show errors
 validation.highlight();
 
-// Hide errors
-validation.hide();
+// Hide all errors
+validation.hideAll();
 
 // Check if container is valid (body by default)
 validation.isValid();
@@ -73,10 +73,10 @@ validation.isValid();
 validation.validate();
 
 // Show a custom popup message on a DOM element
-validation.showOne(el, message);
+validation.show(el, message);
 
 // Hide the popup message from the DOM element
-validation.hideOne(el);
+validation.hide(el);
 ```
 
 ## Custom Class Validation
@@ -94,7 +94,7 @@ HTML
 JS
 
 ```js
-validation.addClassValidation(".my-class-invalid", 'Validation Message');
+validation.addClassValidation("#customClassValidation", ".my-class-invalid", 'Validation Message');
 
 // Test
 document.getElementById("customClassValidation").addEventListener("click", e => {

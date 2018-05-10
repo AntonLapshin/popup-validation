@@ -1,13 +1,13 @@
 import "./style.scss";
 import rules from "./rules";
 
-const document = window.document;
+const _customSelectors = [];
+const doc = window.document;
 const VALIDATE = "validate";
 const VALIDATE_POPUP = "validate-popup";
 const DATA_VALIDATE = "data-validate";
 const VALIDATE_ERROR = "validate-error";
 const ACTIVE = "active";
-const _customSelectors = [];
 const OPTIONS = {
   events: ["change", "paste", "blur", "keyup"]
 };
@@ -57,14 +57,19 @@ const createPopup = el => (
   el.previousElementSibling
 );
 
+const classList = {
+  add: (el, className) => (el.className += " " + className),
+  remove: (el, className) => el.className = el.className.replace(className, "")
+};
+
 const forceToggleClass = (
   el,
   className,
   value,
-  contains = el.classList.contains(className)
+  contains = ~el.className.indexOf(className)
 ) =>
   ((value && !contains) || (!value && contains)) &&
-  el.classList[value && !contains ? "add" : "remove"](className);
+  classList[value && !contains ? "add" : "remove"](el, className);
 
 const show = (el, message) => {
   el = getEl(el);
@@ -105,8 +110,7 @@ const hide = el => {
     forceToggleClass(popup, ACTIVE, false);
 };
 
-const toggle = (el, message) =>
-  message ? show(el, message) : hide(el);
+const toggle = (el, message) => (message ? show(el, message) : hide(el));
 
 const onAction = e => {
   const input = e.target;
@@ -117,7 +121,7 @@ const onAction = e => {
 
   if (input.type === "radio") {
     const name = input.name;
-    const rbs = document.querySelectorAll(`input[name="${name}"]`);
+    const rbs = doc.querySelectorAll(`input[name="${name}"]`);
     [].forEach.call(rbs, rb => toggle(rb, message));
   } else {
     toggle(input, message);
@@ -125,13 +129,12 @@ const onAction = e => {
 };
 
 const getEl = (el = "body") =>
-  typeof el === "string" ? document.querySelector(el) || document.body : el;
+  typeof el === "string" ? doc.querySelector(el) || doc.body : el;
 
 const getValidateEls = el => el.querySelectorAll("." + VALIDATE);
 
 const onClick = e =>
-  e.target.matches("." + VALIDATE_POPUP) &&
-  hide(e.target.nextElementSibling);
+  e.target.matches("." + VALIDATE_POPUP) && hide(e.target.nextElementSibling);
 
 const onSubmit = e => {
   const isValid = validation.validate(e.target);
@@ -141,7 +144,7 @@ const onSubmit = e => {
 
 const onResize = throttle(
   () =>
-    [].forEach.call(document.querySelectorAll("." + VALIDATE_POPUP), popup =>
+    [].forEach.call(doc.querySelectorAll("." + VALIDATE_POPUP), popup =>
       forceToggleClass(popup, ACTIVE, false)
     ),
   1000
@@ -156,7 +159,7 @@ const setupEventHandlers = (el, setup) => {
   );
 
   el.nodeName === "FORM" && el[action]("submit", onSubmit);
-  document[action]("click", onClick);
+  doc[action]("click", onClick);
   window[action]("resize", onResize);
 };
 
@@ -172,10 +175,28 @@ const validation = {
   init: (el, options) => (
     Object.assign(OPTIONS, options), setupEventHandlers(el, true), validation
   ),
+
   /**
    * Predefined set of the rules
    */
   rules,
+
+  /**
+   * Show a message for an input field
+   *
+   * @param {Element|string} el dom element or selector
+   * @param {string} message Popup message
+   * @returns {object} validation instance (chain call)
+   */
+  show: (el, message) => (show(el, message), validation),
+
+  /**
+   * Hide a popup message for an input field
+   *
+   * @param {Element|string} el dom element or selector
+   * @returns {object} validation instance (chain call)
+   */
+  hide: el => (hide(el), validation),
 
   /**
    * Deactivate the validation fields
@@ -186,6 +207,7 @@ const validation = {
   destroy: el => (
     validation.hideAll(el), setupEventHandlers(el, false), validation
   ),
+
   /**
    * Hide all opened popups inside of the container
    *
@@ -195,6 +217,7 @@ const validation = {
   hideAll: el => (
     [].forEach.call(getValidateEls(getEl(el)), input => hide(input)), validation
   ),
+
   /**
    * Show error popups inside of the container
    *
@@ -241,7 +264,7 @@ const validation = {
    * @returns {object} validation instance (chain call)
    */
   addClassValidation: (target, selector, msg = "Invalid") => {
-    const styleTag = document.createElement("style");
+    const styleTag = doc.createElement("style");
     styleTag.innerHTML = selector
       .split(",")
       .map(s =>
@@ -251,34 +274,14 @@ const validation = {
         )
       )
       .join("");
-    document.head.appendChild(styleTag);
+    doc.head.appendChild(styleTag);
     _customSelectors.push(selector);
     [].forEach.call(
-      document.querySelectorAll(target),
-      el => (
-        el.classList.add(selector.substring(1) + "-ready"),
-        el.classList.add('validate-class')
-      )
+      doc.querySelectorAll(target),
+      el => (el.className += ` validate-class ${selector.substring(1)}-ready`)
     );
     return validation;
-  },
-
-  /**
-   * Show a message for an input field
-   *
-   * @param {Element|string} el dom element or selector
-   * @param {string} message Popup message
-   * @returns {object} validation instance (chain call)
-   */
-  show: (el, message) => (show(el, message), validation),
-
-  /**
-   * Hide a popup message for an input field
-   *
-   * @param {Element|string} el dom element or selector
-   * @returns {object} validation instance (chain call)
-   */
-  hide: el => (hide(el), validation)
+  }
 };
 
 export default validation;
