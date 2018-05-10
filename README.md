@@ -37,19 +37,19 @@ JS
 
 Initialization
 
-* Track input fields inside of the `<body>`
+* Track all the input fields inside of the `<body>`
 
 ```js
 validation.init();
 ```
 
-* Track input fields inside of a container or a form. `Submit` event will be prevented if there are any errors
+* Track all the input fields inside of a DOM container or a `<form>`. `Submit` event will be prevented if there are any errors
 
 ```js
 validation.init("#myForm");
 ```
 
-* Set options: trigger events (when popups should be shown)
+* Set options: trigger events (when popups should be shown). ["change", "paste", "blur", "keyup"] by default.
 
 ```js
 validation.init("#myForm", {
@@ -66,13 +66,13 @@ validation.highlight();
 // Hide all errors
 validation.hideAll();
 
-// Check if container is valid (body by default)
-validation.isValid();
+// Check if all the input fields inside of a container are valid (body by default)
+validation.isValid(); // returns true or false
 
-// Check if cotnainer is valid (body by default) + highlight
-validation.validate();
+// isValid + highlight
+validation.validate(); // returns true or false
 
-// Show a custom popup message on a DOM element
+// Show a custom popup message on any DOM element
 validation.show(el, message);
 
 // Hide the popup message from the DOM element
@@ -86,7 +86,7 @@ Some services like [Braintree](https://www.braintreepayments.com/) use iframes t
 HTML
 
 ```html
-<div id="customClassValidation" class="validate-class">
+<div id="my_id">
   Click at me to toggle custom class validation
 </div> 
 ```
@@ -94,10 +94,10 @@ HTML
 JS
 
 ```js
-validation.addClassValidation("#customClassValidation", ".my-class-invalid", 'Validation Message');
+validation.addClassValidation("#my_id", ".my-class-invalid", 'Validation Message');
 
 // Test
-document.getElementById("customClassValidation").addEventListener("click", e => {
+document.getElementById("my_id").addEventListener("click", e => {
   e.target.classList.toggle("my-class-invalid");
 });
 ```
@@ -115,7 +115,7 @@ document.getElementById("customClassValidation").addEventListener("click", e => 
 # API
 
 ## validation.init(el, options) => <code>self</code>
-Initialize the validation fields inside of the `el` container. If `el` is a `<form>` element then submit event will be prevented if there are any errors
+Initialize the validation fields inside of the `el` container. If `el` is a `<form>` element then the submit event will be prevented if there are any errors
 
 **Returns**: <code>object</code> - Self validation instance for chain calls
 
@@ -152,7 +152,7 @@ Deactivate the validation fields inside of the `el` container
 | --- | --- | --- |
 | el | <code>Element</code> | Container or `<form>` Element |
 
-## validation.hide(el) => <code>self</code>
+## validation.hideAll(el) => <code>self</code>
 Hide all errors inside of the `el` container
 
 **Returns**: <code>object</code> - Self validation instance for chain calls
@@ -188,7 +188,7 @@ Validate all input fields inside of the `el` container
 | --- | --- | --- |
 | el | <code>Element</code> | Container or `<form>` Element |
 
-## validation.showOne(el, message) => <code>void</code>
+## validation.show(el, message) => <code>void</code>
 Show a custom popup message on a DOM element
 
 | Param | Type | Description |
@@ -196,7 +196,7 @@ Show a custom popup message on a DOM element
 | el | <code>Element</code> | DOM element |
 | message | <code>string</code> | Custom message |
 
-## validation.hideOne(el) => <code>void</code>
+## validation.hide(el) => <code>void</code>
 Hide the shown custom popup message from the DOM element
 
 | Param | Type | Description |
@@ -236,14 +236,15 @@ HTML
 <input class="validate" data-validate="required,integer" />
 ```
 
-## validation.addClassValidation(selector, message) => <code>self</code>
-Add class validation. For external libraries that can set/remove className of the element. For instance, braintree-hosted-fields-invalid class is set by braintree client library when iframe with the input field detects an error, More info here:
+## validation.addClassValidation(target, selector, message) => <code>self</code>
+Add class validation. For external libraries that can set/remove className of an element. For instance, braintree-hosted-fields-invalid class is set by braintree client library when iframe with the input field detects an error, More info here:
 https://developers.braintreepayments.com/guides/hosted-fields/styling/javascript/v2
 
 **Returns**: <code>object</code> - Self validation instance for chain calls
 
 | Param | Type | Description |
 | --- | --- | --- |
+| target | <code>string|Element</code> | Target DOM element where popup should be shown on |
 | selector | <code>string</code> | Selector that indicates that the field is invalid |
 | message | <code>string</code> | Optional. "Invalid" by default |
 
@@ -253,7 +254,7 @@ https://developers.braintreepayments.com/guides/hosted-fields/styling/javascript
 
 | [<img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/edge.png" alt="IE / Edge" width="16px" height="16px" />](http://godban.github.io/browsers-support-badges/)</br>IE / Edge | [<img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/firefox.png" alt="Firefox" width="16px" height="16px" />](http://godban.github.io/browsers-support-badges/)</br>Firefox | [<img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/chrome.png" alt="Chrome" width="16px" height="16px" />](http://godban.github.io/browsers-support-badges/)</br>Chrome | [<img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/safari.png" alt="Safari" width="16px" height="16px" />](http://godban.github.io/browsers-support-badges/)</br>Safari | [<img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/opera.png" alt="Opera" width="16px" height="16px" />](http://godban.github.io/browsers-support-badges/)</br>Opera | [<img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/safari-ios.png" alt="iOS Safari" width="16px" height="16px" />](http://godban.github.io/browsers-support-badges/)</br>iOS Safari | [<img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/chrome-android.png" alt="Chrome for Android" width="16px" height="16px" />](http://godban.github.io/browsers-support-badges/)</br>Chrome for Android |
 | --------- | --------- | --------- | --------- | --------- | --------- | --------- |
-| IE9+ | last 12 versions | last 10 versions| last 15 versions | last 14 versions| last 12 versions | last 13 versions
+| IE9+ | Any | Any | Any | Any | Any | Any
 
 ## License
 

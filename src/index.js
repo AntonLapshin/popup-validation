@@ -1,29 +1,21 @@
 import "./style.scss";
 import rules from "./rules";
 
-const _customSelectors = [];
-const doc = window.document;
-const VALIDATE = "validate";
-const VALIDATE_POPUP = "validate-popup";
-const DATA_VALIDATE = "data-validate";
-const VALIDATE_ERROR = "validate-error";
-const ACTIVE = "active";
-const OPTIONS = {
-  events: ["change", "paste", "blur", "keyup"]
-};
-const CUSTOM_CLASS_STYLES = `
-  {0} {
-    border-color: #D10000;
-  }
-  {0}:before {
-    opacity: 1;
-  }
-  {0}:after {
-    opacity: 1;
-  }  
-  {0}-ready:before {
-    {1};
-  }`;
+const _customSelectors = [],
+  doc = window.document,
+  OPTIONS = {
+    events: ["change", "paste", "blur", "keyup"]
+  },
+  CUSTOM_CLASS_STYLES = `
+    {0}:before, {0}:after{
+      opacity: 1;
+    } 
+    {0} {
+      border-color: #D10000 !important;
+    }
+    {0}-ready:before {
+      content: '{1}';
+    }`;
 
 const throttle = (fn, threshhold = 250, scope) => {
   let last, deferTimer;
@@ -45,7 +37,7 @@ const throttle = (fn, threshhold = 250, scope) => {
 
 const getMessage = input =>
   input
-    .getAttribute(DATA_VALIDATE)
+    .getAttribute("data-validate")
     .split(",")
     .map(type => type.trim())
     .filter(type => !rules[type].method(input))
@@ -53,23 +45,22 @@ const getMessage = input =>
     .join(", ");
 
 const createPopup = el => (
-  el.insertAdjacentHTML("beforebegin", `<div class="${VALIDATE_POPUP}"/>`),
+  el.insertAdjacentHTML("beforebegin", `<div class="validate-popup"/>`),
   el.previousElementSibling
 );
 
-const classList = {
-  add: (el, className) => (el.className += " " + className),
-  remove: (el, className) => el.className = el.className.replace(className, "")
-};
+const addClass = (el, className) => (el.className += " " + className);
+const delClass = (el, className) =>
+  (el.className = el.className.replace(className, ""));
 
-const forceToggleClass = (
+const changeClass = (
   el,
   className,
   value,
   contains = ~el.className.indexOf(className)
 ) =>
-  ((value && !contains) || (!value && contains)) &&
-  classList[value && !contains ? "add" : "remove"](el, className);
+  (value && !contains && addClass(el, className)) ||
+  (contains && !value && delClass(el, className));
 
 const show = (el, message) => {
   el = getEl(el);
@@ -77,10 +68,10 @@ const show = (el, message) => {
     return;
   }
 
-  forceToggleClass(el, VALIDATE_ERROR, true);
+  changeClass(el, "validate-error", true);
   let popup = el.previousElementSibling;
 
-  if (!popup || !popup.matches("." + VALIDATE_POPUP)) {
+  if (!popup || !popup.matches(".validate-popup")) {
     popup = createPopup(el);
   }
   popup.innerHTML = message;
@@ -92,29 +83,25 @@ const show = (el, message) => {
     popup.style.left = left + "px";
     popup.style.top = el.offsetTop + "px";
     popup.style.marginTop = -(popup.clientHeight + 8) + "px";
-    forceToggleClass(popup, ACTIVE, true);
-    forceToggleClass(
-      popup,
-      "short-version",
-      el.clientWidth < popup.clientWidth
-    );
+    changeClass(popup, "active", true);
+    changeClass(popup, "short-version", el.clientWidth < popup.clientWidth);
   }, 0);
 };
 
 const hide = el => {
   el = getEl(el);
-  forceToggleClass(el, VALIDATE_ERROR, false);
+  changeClass(el, "validate-error", false);
   const popup = el.previousElementSibling;
   popup &&
-    popup.matches("." + VALIDATE_POPUP) &&
-    forceToggleClass(popup, ACTIVE, false);
+    popup.matches(".validate-popup") &&
+    changeClass(popup, "active", false);
 };
 
 const toggle = (el, message) => (message ? show(el, message) : hide(el));
 
 const onAction = e => {
   const input = e.target;
-  if (!input.matches("." + VALIDATE)) {
+  if (!input.matches(".validate")) {
     return;
   }
   const message = getMessage(input);
@@ -131,10 +118,10 @@ const onAction = e => {
 const getEl = (el = "body") =>
   typeof el === "string" ? doc.querySelector(el) || doc.body : el;
 
-const getValidateEls = el => el.querySelectorAll("." + VALIDATE);
+const getValidateEls = el => el.querySelectorAll(".validate");
 
 const onClick = e =>
-  e.target.matches("." + VALIDATE_POPUP) && hide(e.target.nextElementSibling);
+  e.target.matches(".validate-popup") && hide(e.target.nextElementSibling);
 
 const onSubmit = e => {
   const isValid = validation.validate(e.target);
@@ -144,8 +131,8 @@ const onSubmit = e => {
 
 const onResize = throttle(
   () =>
-    [].forEach.call(doc.querySelectorAll("." + VALIDATE_POPUP), popup =>
-      forceToggleClass(popup, ACTIVE, false)
+    [].forEach.call(doc.querySelectorAll(".validate-popup"), popup =>
+      changeClass(popup, "active", false)
     ),
   1000
 );
@@ -173,7 +160,9 @@ const validation = {
    * @returns {object} validation instance (chain call)
    */
   init: (el, options) => (
-    Object.assign(OPTIONS, options), setupEventHandlers(el, true), validation
+    Object.assign({}, OPTIONS, options),
+    setupEventHandlers(el, true),
+    validation
   ),
 
   /**
@@ -268,10 +257,7 @@ const validation = {
     styleTag.innerHTML = selector
       .split(",")
       .map(s =>
-        CUSTOM_CLASS_STYLES.replace(/\{0\}/gi, s).replace(
-          /\{1\}/gi,
-          !msg ? "" : `content: '${msg}'`
-        )
+        CUSTOM_CLASS_STYLES.replace(/\{0\}/gi, s).replace(/\{1\}/gi, msg)
       )
       .join("");
     doc.head.appendChild(styleTag);

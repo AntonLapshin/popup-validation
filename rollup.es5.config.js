@@ -14,7 +14,7 @@ export default {
       output: "bin/validation.min.css",
       outputStyle: "compressed"
     }),
-    polyfill('index.js', ['./polyfills/assign.js', './polyfills/matches.js']),
+    polyfill("index.js", ["./polyfills/assign.js", "./polyfills/matches.js"]),
     babel({
       babelrc: false,
       presets: [
