@@ -5,7 +5,7 @@ $bgcolor: #d10000;
 }
 
 .validate-popup {
-  transition: all ease 400ms;
+  transition: all ease 300ms;
   cursor: pointer;
   position: absolute;
   background-color: $bgcolor;
@@ -51,15 +51,16 @@ $bgcolor: #d10000;
 
 .validate-class:before,
 .validate-class:after {
+  content: '';
   opacity: 0;
-  transition: opacity ease 400ms;
+  transition: opacity ease 300ms;
   position: absolute;
   right: 0;
   top: -36px;
 }
 
 .validate-class:before {
-  background-color: #d10000;
+  background-color: $bgcolor;
   color: white;
   font-size: 12px;
   line-height: 1;
@@ -68,12 +69,11 @@ $bgcolor: #d10000;
 }
 
 .validate-class:after {
-  content: '';
   width: 0;
   height: 0;
   border-style: solid;
   border-width: 5px 5px 0 5px;
-  border-color: #d10000 transparent transparent transparent;
+  border-color: $bgcolor transparent transparent transparent;
   margin-top: 28px;
   margin-right: 10px;
 }

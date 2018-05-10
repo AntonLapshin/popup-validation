@@ -1,28 +1,21 @@
 import "./style.scss";
-import { RULES } from "./rules";
+import rules from "./rules";
 
-const VALIDATE = "validate";
-const VALIDATE_POPUP = "validate-popup";
-const DATA_VALIDATE = "data-validate";
-const VALIDATE_ERROR = "validate-error";
-const ACTIVE = "active";
-const OPTIONS = {
-  events: ["change", "paste", "blur", "keyup"]
-};
-const CUSTOM_CLASS_STYLES = `
-  {0} {
-    border-color: #D10000 !important;
-  }
-  {0}:before {
-    opacity: 1 !important;
-    {1}
-  }
-  {0}:after {
-    opacity: 1 !important;
-  }`;
-const document = window.document;
-
-let _customSelector = "";
+const _customSelectors = [],
+  doc = window.document,
+  OPTIONS = {
+    events: ["change", "paste", "blur", "keyup"]
+  },
+  CUSTOM_CLASS_STYLES = `
+    {0}:before, {0}:after{
+      opacity: 1;
+    } 
+    {0} {
+      border-color: #D10000 !important;
+    }
+    {0}-ready:before {
+      content: '{1}';
+    }`;
 
 const throttle = (fn, threshhold = 250, scope) => {
   let last, deferTimer;
@@ -44,90 +37,78 @@ const throttle = (fn, threshhold = 250, scope) => {
 
 const getMessage = input =>
   input
-    .getAttribute(DATA_VALIDATE)
+    .getAttribute("data-validate")
     .split(",")
     .map(type => type.trim())
-    .filter(type => !RULES[type].method(input))
-    .map(type => RULES[type].message)
+    .filter(type => !rules[type].method(input))
+    .map(type => rules[type].message)
     .join(", ");
 
-const createPopup = input => {
-  let popup = document.createElement("div");
-  popup.classList.add(VALIDATE_POPUP);
-  const wrap = document.createElement("div");
-  wrap.appendChild(popup.cloneNode(true));
-  input.insertAdjacentHTML("beforebegin", wrap.innerHTML);
-  popup = input.previousElementSibling;
-  return popup;
-};
+const createPopup = el => (
+  el.insertAdjacentHTML("beforebegin", `<div class="validate-popup"/>`),
+  el.previousElementSibling
+);
 
-const forceToggleClass = (el, className, force) => {
-  if (force && !el.classList.contains(className)) {
-    el.classList.add(className);
-  } else if (!force && el.classList.contains(className)) {
-    el.classList.remove(className);
-  }
-};
+const addClass = (el, className) => (el.className += " " + className);
+const delClass = (el, className) =>
+  (el.className = el.className.replace(className, ""));
 
-const show = (input, message) => {
-  if (input.offsetWidth === 0 && input.offsetHeight === 0) {
+const changeClass = (
+  el,
+  className,
+  value,
+  contains = ~el.className.indexOf(className)
+) =>
+  (value && !contains && addClass(el, className)) ||
+  (contains && !value && delClass(el, className));
+
+const show = (el, message) => {
+  el = getEl(el);
+  if (el.offsetWidth === 0 && el.offsetHeight === 0) {
     return;
   }
 
-  forceToggleClass(input, VALIDATE_ERROR, true);
-  let popup = input.previousElementSibling;
+  changeClass(el, "validate-error", true);
+  let popup = el.previousElementSibling;
 
-  if (!popup || !popup.matches("." + VALIDATE_POPUP)) {
-    //
-    // Create popup if it doesn't exist
-    //
-    popup = createPopup(input);
+  if (!popup || !popup.matches(".validate-popup")) {
+    popup = createPopup(el);
   }
   popup.innerHTML = message;
   window.setTimeout(() => {
     const left =
-      input.clientWidth < popup.clientWidth
-        ? ~~(input.offsetLeft + input.offsetWidth / 2 - 14) + 1
-        : input.offsetLeft + input.clientWidth - popup.clientWidth + 1;
-    const top = input.offsetTop;
+      el.clientWidth < popup.clientWidth
+        ? ~~(el.offsetLeft + el.offsetWidth / 2 - 14) + 1
+        : el.offsetLeft + el.clientWidth - popup.clientWidth + 1;
     popup.style.left = left + "px";
-    popup.style.top = top + "px";
+    popup.style.top = el.offsetTop + "px";
     popup.style.marginTop = -(popup.clientHeight + 8) + "px";
-    forceToggleClass(popup, ACTIVE, true);
-    forceToggleClass(
-      popup,
-      "short-version",
-      input.clientWidth < popup.clientWidth
-    );
+    changeClass(popup, "active", true);
+    changeClass(popup, "short-version", el.clientWidth < popup.clientWidth);
   }, 0);
 };
 
-const hide = input => {
-  forceToggleClass(input, VALIDATE_ERROR, false);
-  const popup = input.previousElementSibling;
-  if (popup && popup.matches("." + VALIDATE_POPUP)) {
-    forceToggleClass(popup, ACTIVE, false);
-  }
+const hide = el => {
+  el = getEl(el);
+  changeClass(el, "validate-error", false);
+  const popup = el.previousElementSibling;
+  popup &&
+    popup.matches(".validate-popup") &&
+    changeClass(popup, "active", false);
 };
 
-const toggle = (input, message) => {
-  if (message) {
-    show(input, message);
-  } else {
-    hide(input);
-  }
-};
+const toggle = (el, message) => (message ? show(el, message) : hide(el));
 
 const onAction = e => {
   const input = e.target;
-  if (!input.matches("." + VALIDATE)) {
+  if (!input.matches(".validate")) {
     return;
   }
   const message = getMessage(input);
 
   if (input.type === "radio") {
     const name = input.name;
-    const rbs = document.querySelectorAll(`input[name="${name}"]`);
+    const rbs = doc.querySelectorAll(`input[name="${name}"]`);
     [].forEach.call(rbs, rb => toggle(rb, message));
   } else {
     toggle(input, message);
@@ -135,50 +116,37 @@ const onAction = e => {
 };
 
 const getEl = (el = "body") =>
-  typeof el === "string" ? document.querySelector(el) || document.body : el;
+  typeof el === "string" ? doc.querySelector(el) || doc.body : el;
 
-const getInputs = el => el.querySelectorAll("." + VALIDATE);
+const getValidateEls = el => el.querySelectorAll(".validate");
 
-const onClick = e => {
-  const popup = e.target;
-  if (!popup.matches("." + VALIDATE_POPUP)) {
-    return;
-  }
-  const input = popup.nextElementSibling;
-  if (input.matches("." + VALIDATE)) {
-    hide(input);
-  }
-};
+const onClick = e =>
+  e.target.matches(".validate-popup") && hide(e.target.nextElementSibling);
 
 const onSubmit = e => {
   const isValid = validation.validate(e.target);
-  if (isValid) {
-    return true;
-  }
-  e.preventDefault();
-  return false;
+  !isValid && e.preventDefault();
+  return isValid;
 };
 
-const onResize = throttle(() => {
-  [].forEach.call(document.querySelectorAll("." + VALIDATE_POPUP), popup =>
-    forceToggleClass(popup, ACTIVE, false)
-  );
-}, 1000);
+const onResize = throttle(
+  () =>
+    [].forEach.call(doc.querySelectorAll(".validate-popup"), popup =>
+      changeClass(popup, "active", false)
+    ),
+  1000
+);
 
 const setupEventHandlers = (el, setup) => {
   el = getEl(el);
   const action = setup ? "addEventListener" : "removeEventListener";
-  const inputs = getInputs(el);
+  const inputs = getValidateEls(el);
   [].forEach.call(inputs, input =>
     OPTIONS.events.forEach(e => input[action](e, onAction))
   );
 
-  document[action]("click", onClick);
-
-  if (el.nodeName === "FORM") {
-    el[action]("submit", onSubmit);
-  }
-
+  el.nodeName === "FORM" && el[action]("submit", onSubmit);
+  doc[action]("click", onClick);
   window[action]("resize", onResize);
 };
 
@@ -186,86 +154,89 @@ const validation = {
   /**
    * Initialize the validation fields
    *
-   * @param {Element|string} el Container or specific form
+   * @param {Element|string} el Container (dom element or selector)
    * @param {object} options [Optional] Set of the properties
    *  - events: [string]
    * @returns {object} validation instance (chain call)
    */
-  init: (el, options) => {
-    Object.assign(OPTIONS, options);
-    setupEventHandlers(el, true);
-    return validation;
-  },
+  init: (el, options) => (
+    Object.assign({}, OPTIONS, options),
+    setupEventHandlers(el, true),
+    validation
+  ),
 
   /**
-   * Predefined set of the Rules
+   * Predefined set of the rules
    */
-  rules: RULES,
+  rules,
+
+  /**
+   * Show a message for an input field
+   *
+   * @param {Element|string} el dom element or selector
+   * @param {string} message Popup message
+   * @returns {object} validation instance (chain call)
+   */
+  show: (el, message) => (show(el, message), validation),
+
+  /**
+   * Hide a popup message for an input field
+   *
+   * @param {Element|string} el dom element or selector
+   * @returns {object} validation instance (chain call)
+   */
+  hide: el => (hide(el), validation),
 
   /**
    * Deactivate the validation fields
    *
-   * @param {Element|string} Container or specific form
+   * @param {Element|string} el Container (dom element or selector)
    * @returns {object} validation instance (chain call)
    */
-  destroy: el => {
-    validation.hide(el);
-    setupEventHandlers(el, false);
-    return validation;
-  },
+  destroy: el => (
+    validation.hideAll(el), setupEventHandlers(el, false), validation
+  ),
 
   /**
-   * Hide all opened popups inside of the containers
+   * Hide all opened popups inside of the container
    *
-   * @param {Element|string} Container or specific form
+   * @param {Element|string} el Container (dom element or selector)
    * @returns {object} validation instance (chain call)
    */
-  hide: el => {
-    el = getEl(el);
-    const inputs = getInputs(el);
-    [].forEach.call(inputs, input => hide(input));
-    return validation;
-  },
+  hideAll: el => (
+    [].forEach.call(getValidateEls(getEl(el)), input => hide(input)), validation
+  ),
 
   /**
    * Show error popups inside of the container
    *
-   * @param {Element} el Container
+   * @param {Element|string} el Container (dom element or selector)
    * @returns {object} validation instance (chain call)
    */
-  highlight: el => {
-    el = getEl(el);
-    const inputs = getInputs(el);
-    [].forEach.call(inputs, input => onAction({ target: input }));
-    return validation;
-  },
+  highlight: el => (
+    [].forEach.call(getValidateEls(getEl(el)), input =>
+      onAction({ target: input })
+    ),
+    validation
+  ),
 
   /**
    * Check if all input fields inside of the container are valid
    *
-   * @param {Element} el Container
+   * @param {Element|string} el Container (dom element or selector)
    * @returns {boolean} True if all input fields inside of the container are valid
    */
-  isValid: el => {
-    el = getEl(el);
-    const inputs = getInputs(el);
-    let valid = [].every.call(inputs, input => !getMessage(input));
-    if (_customSelector && el.querySelectorAll(_customSelector).length > 0) {
-      valid = false;
-    }
-    return valid;
-  },
+  isValid: el =>
+    getEl(el).querySelectorAll(_customSelectors.join(",")).length === 0 &&
+    [].every.call(getValidateEls(getEl(el)), input => !getMessage(input)),
 
   /**
    * Validate all input fields in the DOM container
    *
-   * @param {Element} el Container
+   * @param {Element|string} el Container (dom element or selector)
    * @returns {boolean} True if all input fields inside of the container are valid
    */
-  validate: el => {
-    validation.highlight(el);
-    return validation.isValid(el);
-  },
+  validate: el => (validation.highlight(el), validation.isValid(el)),
 
   /**
    * Add class validation. For external libraries that can
@@ -276,30 +247,27 @@ const validation = {
    * input fieldan error detects an error, More info here:
    * https://developers.braintreepayments.com/guides/hosted-fields/styling/javascript/v2
    *
+   * @param {string} target Selector of the target element
    * @param {string} selector Selector that indicates that the field is invalid
    * @param {string} Optional: message. "Invalid" by default
    * @returns {object} validation instance (chain call)
    */
-  addClassValidation: (selector, msg = 'Invalid') => {
-    const styles = selector
+  addClassValidation: (target, selector, msg = "Invalid") => {
+    const styleTag = doc.createElement("style");
+    styleTag.innerHTML = selector
       .split(",")
       .map(s =>
-        CUSTOM_CLASS_STYLES.replace(/\{0\}/gi, s).replace(
-          /\{1\}/gi,
-          !msg ? "" : `content: '${msg}' !important;`
-        )
+        CUSTOM_CLASS_STYLES.replace(/\{0\}/gi, s).replace(/\{1\}/gi, msg)
       )
       .join("");
-    const styleTag = document.createElement("style");
-    styleTag.innerHTML = styles;
-    document.head.appendChild(styleTag);
-    _customSelector =
-      _customSelector + (_customSelector === "" ? "" : ",") + selector;
+    doc.head.appendChild(styleTag);
+    _customSelectors.push(selector);
+    [].forEach.call(
+      doc.querySelectorAll(target),
+      el => (el.className += ` validate-class ${selector.substring(1)}-ready`)
+    );
     return validation;
-  },
-
-  showOne: show,
-  hideOne: hide
+  }
 };
 
 export default validation;

@@ -2,6 +2,7 @@ import resolve from "rollup-plugin-node-resolve";
 import scss from "rollup-plugin-scss";
 import babel from "rollup-plugin-babel";
 import uglify from "rollup-plugin-uglify";
+import polyfill from "rollup-plugin-polyfill";
 
 export default {
   entry: "src/index.js",
@@ -13,6 +14,7 @@ export default {
       output: "bin/validation.min.css",
       outputStyle: "compressed"
     }),
+    polyfill("index.js", ["./polyfills/assign.js", "./polyfills/matches.js"]),
     babel({
       babelrc: false,
       presets: [
