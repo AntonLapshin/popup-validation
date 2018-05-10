@@ -137,22 +137,28 @@
     <button id="submitButton" type="submit">Submit</button>
   </form>
 
-  <script src="validation.es6.js"></script>
+  <script src="validation.min.js"></script>
   <script>
     validation.init("form");
 
     //
     // Custom Class Validation Example
     //
+    var enabled = false;
     validation.addClassValidation("#customClassValidation", ".my-class-invalid", "Field is invalid");
-    document.getElementById("customClassValidation").addEventListener("click", e => {
-      e.target.classList.toggle("my-class-invalid");
+    document.getElementById("customClassValidation").addEventListener("click", function(e){
+      if (enabled){
+        e.target.className = e.target.className.replace(/my-class-invalid$/, "");
+      } else {
+        e.target.className += " my-class-invalid";
+      }
+      enabled = !enabled;
     });
 
     //
     // Manual Validation Example
     //
-    document.getElementById("manualValidation").addEventListener("click", e => {
+    document.getElementById("manualValidation").addEventListener("click", function(e) {
       validation.show("#manualValidation", "My custom message");
     });
   </script>
