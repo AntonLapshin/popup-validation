@@ -69,7 +69,7 @@ validation.hideAll();
 // Check if all the input fields inside of a container are valid (body by default)
 validation.isValid(); // returns true or false
 
-// isValid + highlight
+// isValid() + highlight()
 validation.validate(); // returns true or false
 
 // Show a custom popup message on any DOM element
