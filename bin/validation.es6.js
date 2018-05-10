@@ -42,13 +42,15 @@ const OPTIONS = {
     events: ["change", "paste", "blur", "keyup"]
   };
 const CUSTOM_CLASS_STYLES = `
-  {0}:before, {0}:after{
-    opacity: 1;
-  } 
-  {0}-ready:before {
-    content: '{1}';
-    border-color: #D10000;
-  }`;
+    {0}:before, {0}:after{
+      opacity: 1;
+    } 
+    {0} {
+      border-color: #D10000 !important;
+    }
+    {0}-ready:before {
+      content: '{1}';
+    }`;
 
 const throttle = (fn, threshhold = 250, scope) => {
   let last, deferTimer;
